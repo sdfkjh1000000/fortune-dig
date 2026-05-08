@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<title>FORTUNE DIG</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+@font-face{font-family:system;src:local("Courier New"),local("Consolas"),local(monospace)}
+:root{
+  --black:#0a0a0a;--cream:#e8dcc8;--orange:#d4713a;--purple:#4a2d6b;
+  --red:#e63946;--grey:#2a2a2a;--label-bg:#c4a96a;
+}
+html,body{height:100%;overscroll-behavior-y:none}
+body{
+  background:var(--black);font-family:"Courier New",monospace;color:var(--cream);
+  display:flex;align-items:flex-start;justify-content:center;
+  position:relative;padding-top:1rem;
+}
+body::before{
+  content:"";position:fixed;inset:0;
+  background:radial-gradient(ellipse at 50% 30%,rgba(200,130,50,.06) 0%,rgba(74,45,107,.12) 50%,transparent 75%);
+  pointer-events:none;z-index:0;
+}
+
+.scanlines{
+  position:fixed;inset:0;pointer-events:none;z-index:100;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent 0px,transparent 2px,
+    rgba(0,0,0,.08) 2px,rgba(0,0,0,.08) 4px
+  );
+}
+.scanlines::after{
+  content:"";position:fixed;inset:0;
+  background:linear-gradient(transparent 50%,rgba(0,0,0,.12) 50%);
+  background-size:100% 4px;
+  animation:scanmove 8s linear infinite;
+  pointer-events:none;
+}
+@keyframes scanmove{0%{transform:translateY(0)}100%{transform:translateY(4px)}}
+
+.kanji-tl,.kanji-tr,.kanji-bl,.kanji-br{
+  position:fixed;font-size:.55rem;color:rgba(212,113,58,.18);
+  font-family:"Courier New",monospace;letter-spacing:.15em;writing-mode:vertical-rl;
+  text-orientation:upright;
+  pointer-events:none;z-index:1;user-select:none;text-transform:uppercase;
+}
+.kanji-tl{top:1.5rem;left:1.5rem}
+.kanji-tr{top:1.5rem;right:1.5rem}
+.kanji-bl{bottom:1.5rem;left:1.5rem}
+.kanji-br{bottom:1.5rem;right:1.5rem}
+
+.scene{
+  position:relative;z-index:2;display:flex;flex-direction:column;
+  align-items:center;gap:.8rem;width:100%;padding-bottom:2rem;
+}
+
+.title{
+  font-size:clamp(.9rem,3vw,1.4rem);letter-spacing:.4em;text-transform:uppercase;
+  color:var(--orange);text-shadow:0 0 20px rgba(212,113,58,.3);
+  animation:nod 1.2s ease-in-out infinite;
+}
+@keyframes nod{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-3px)}
+}
+
+.crate-wrap{position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;margin-top:clamp(180px,38vw,240px)}
+
+.crate{
+  width:clamp(200px,50vw,280px);
+  position:relative;overflow:visible;
+  animation:cratePulse 3s ease-in-out infinite;
+}
+.crate-img{
+  width:100%;height:auto;display:block;
+  user-select:none;-webkit-user-drag:none;
+  pointer-events:none;
+  max-height:400px;
+}
+.crate.dug{animation:none}
+.crate.dug .crate-img{animation:crateAway .7s ease .3s forwards}
+@keyframes crateAway{
+  0%{opacity:1;transform:none;max-height:400px}
+  50%{opacity:0;transform:translateY(20px);max-height:400px}
+  100%{opacity:0;transform:translateY(20px);max-height:0}
+}
+@keyframes cratePulse{
+  0%,100%{filter:drop-shadow(0 8px 15px rgba(0,0,0,.6))}
+  50%{filter:drop-shadow(0 8px 15px rgba(0,0,0,.6)) drop-shadow(0 0 20px rgba(212,113,58,.2))}
+}
+.dig-hint{
+  font-size:clamp(.55rem,1.3vw,.7rem);letter-spacing:.3em;
+  color:var(--orange);text-transform:uppercase;
+  animation:hintPulse 1.8s ease-in-out infinite;
+}
+@keyframes hintPulse{
+  0%,100%{opacity:.3;transform:translateY(0)}
+  50%{opacity:.8;transform:translateY(3px)}
+}
+.milestone{
+  position:fixed;top:35%;left:50%;transform:translate(-50%,-50%);
+  font-family:inherit;font-size:clamp(1rem,3vw,1.6rem);letter-spacing:.4em;
+  text-transform:uppercase;color:var(--orange);
+  text-shadow:0 0 30px rgba(212,113,58,.5),0 0 60px rgba(212,113,58,.2);
+  pointer-events:none;z-index:80;opacity:0;
+}
+.milestone.active{animation:milestoneFlash 2s ease-out forwards}
+@keyframes milestoneFlash{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.8)}
+  15%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}
+  30%{transform:translate(-50%,-50%) scale(1)}
+  80%{opacity:1}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1)}
+}
+.counter.flash{opacity:.6;color:var(--orange);transition:opacity .3s,color .3s}
+
+
+.record{
+  position:absolute;top:0;left:50%;
+  width:clamp(140px,35vw,180px);height:clamp(140px,35vw,180px);
+  transform:translate(-50%,20%);
+  opacity:0;pointer-events:none;
+  transition:none;
+}
+.record.digging{
+  animation:slideUp .6s cubic-bezier(.23,1,.32,1) forwards;
+  pointer-events:auto;
+}
+.record.resetting{
+  animation:slideDown .3s ease-in forwards;
+}
+@keyframes slideUp{
+  0%{transform:translate(-50%,20%);opacity:0}
+  30%{opacity:1}
+  70%{transform:translate(-50%,-104%);opacity:1}
+  85%{transform:translate(-50%,-96%)}
+  100%{transform:translate(-50%,-100%);opacity:1}
+}
+@keyframes slideDown{
+  0%{transform:translate(-50%,-100%);opacity:1}
+  70%{opacity:1}
+  100%{transform:translate(-50%,20%);opacity:0}
+}
+
+.speed-lines{
+  position:fixed;inset:0;pointer-events:none;z-index:50;
+  opacity:0;
+}
+.speed-lines.active{animation:speedFlash .5s ease-out forwards}
+@keyframes speedFlash{
+  0%{opacity:1}
+  100%{opacity:0}
+}
+.speed-lines::before{
+  content:"";position:absolute;inset:0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,transparent 48%,
+      rgba(230,57,70,.06) 48%,rgba(230,57,70,.06) 48.5%,
+      transparent 48.5%,transparent 51.5%,
+      rgba(230,57,70,.06) 51.5%,rgba(230,57,70,.06) 52%,
+      transparent 52%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0%,
+      rgba(255,255,255,.03) 40%,
+      rgba(255,255,255,.08) 50%,
+      rgba(255,255,255,.03) 60%,
+      transparent 100%
+    );
+}
+
+.impact{
+  position:fixed;inset:0;pointer-events:none;z-index:60;
+  background:rgba(255,255,255,.9);opacity:0;
+}
+.impact.active{animation:impactFlash .15s ease-out forwards}
+@keyframes impactFlash{
+  0%{opacity:.85}
+  100%{opacity:0}
+}
+
+.vinyl{
+  width:100%;height:100%;border-radius:50%;position:relative;touch-action:none;
+  background:radial-gradient(
+    circle,
+    transparent 18%,
+    #111 19%,#0d0d0d 20%,
+    #1a1a1a 21%,#111 22%,
+    #1a1a1a 24%,#111 25%,
+    #1a1a1a 27%,#111 28%,
+    #1a1a1a 30%,#0f0f0f 31%,
+    #1a1a1a 33%,#111 34%,
+    #1a1a1a 36%,#111 37%,
+    #1a1a1a 39%,#0d0d0d 40%,
+    #1a1a1a 42%,#111 43%,
+    #1a1a1a 45%,#111 46%,
+    #1a1a1a 48%,#111 49%,
+    #1a1a1a 50%
+  );
+  box-shadow:0 4px 30px rgba(0,0,0,.5),inset 0 0 60px rgba(0,0,0,.3);
+}
+.vinyl::after{
+  content:"";position:absolute;top:50%;left:50%;
+  width:6%;height:6%;border-radius:50%;
+  background:#222;border:1px solid #333;
+  transform:translate(-50%,-50%);
+}
+.record::before{
+  content:"";position:absolute;inset:0;border-radius:50%;
+  background:linear-gradient(
+    135deg,transparent 30%,
+    rgba(255,255,255,.04) 44%,rgba(255,255,255,.09) 50%,
+    rgba(255,255,255,.04) 56%,transparent 70%
+  );
+  pointer-events:none;z-index:3;
+}
+.record.digging .vinyl{cursor:grab}
+.record.digging .vinyl.scratching{cursor:grabbing}
+
+.label{
+  position:absolute;top:50%;left:50%;
+  width:52%;height:52%;border-radius:50%;
+  transform:translate(-50%,-50%);
+  background:var(--label-bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:8% 10%;text-align:center;overflow:hidden;
+  box-shadow:inset 0 0 15px rgba(0,0,0,.2);
+  z-index:1;
+}
+.label::before{
+  content:"";position:absolute;inset:0;border-radius:50%;
+  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  opacity:.5;pointer-events:none;
+}
+.label-logo{
+  width:85%;max-width:120px;margin-bottom:2px;
+}
+.label-tagline{
+  font-size:clamp(.28rem,.7vw,.38rem);letter-spacing:.2em;
+  text-transform:uppercase;color:#5a3e1a;margin-bottom:3px;
+  font-weight:bold;opacity:.6;
+}
+.fortune-text{
+  font-size:clamp(.45rem,1.3vw,.65rem);line-height:1.35;
+  color:#2a1c0f;font-weight:bold;
+  max-height:50%;overflow:hidden;
+}
+.label-number{
+  font-size:clamp(.28rem,.6vw,.36rem);color:rgba(90,62,26,.3);
+  margin-top:3px;letter-spacing:.15em;
+}
+
+.record.digging .label{
+  animation:labelReveal .4s ease-out .4s both;
+}
+@keyframes labelReveal{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.8)}
+  100%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+}
+
+.dig-btn{
+  background:transparent;border:1px solid rgba(212,113,58,.4);
+  color:var(--orange);padding:.4rem 1.5rem;font-family:inherit;
+  font-size:clamp(.5rem,1.2vw,.7rem);letter-spacing:.35em;text-transform:uppercase;
+  cursor:pointer;position:relative;overflow:hidden;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s,border-color .2s,color .2s;
+}
+.dig-btn.visible{opacity:1;pointer-events:auto;animation:btnPulse 2.5s ease-in-out .5s infinite}
+.dig-btn:active{transform:scale(.95);transition:transform .1s}
+@keyframes btnPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(212,113,58,0)}
+  50%{box-shadow:0 0 15px rgba(212,113,58,.2),0 0 30px rgba(212,113,58,.08)}
+}
+.dig-btn:hover{border-color:var(--orange);color:var(--cream)}
+.dig-btn::before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(212,113,58,.08),transparent);
+  transform:translateX(-100%);
+}
+.dig-btn:hover::before{animation:btnShine .6s forwards}
+@keyframes btnShine{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+.video-wrap{
+  width:clamp(300px,85vw,560px);opacity:0;pointer-events:none;
+  transition:opacity .5s ease;
+}
+.video-wrap.visible{opacity:1;pointer-events:auto}
+.video-frame{
+  position:relative;width:100%;padding-bottom:56.25%;
+  border:2px solid rgba(212,113,58,.3);border-radius:4px;
+  overflow:hidden;background:#111;
+  box-shadow:0 4px 30px rgba(0,0,0,.5);
+}
+.video-frame iframe{
+  position:absolute;inset:0;width:100%;height:100%;border:none;
+}
+.video-label{
+  text-align:center;margin-top:.5rem;
+  font-size:clamp(.5rem,1.2vw,.65rem);letter-spacing:.2em;
+  color:rgba(212,113,58,.4);text-transform:uppercase;
+}
+.jzzo-link{
+  color:var(--orange);text-decoration:none;
+  border-bottom:1px solid rgba(212,113,58,.3);
+  transition:border-color .2s;
+}
+.jzzo-link:hover{border-color:var(--orange)}
+
+.counter{
+  font-size:.55rem;letter-spacing:.2em;color:rgba(232,220,200,.15);
+  position:fixed;bottom:1rem;right:1.5rem;z-index:2;
+}
+
+@media(max-width:480px){
+  .kanji-tl,.kanji-tr,.kanji-bl,.kanji-br{font-size:.45rem;opacity:.12}
+  .kanji-tl,.kanji-bl{left:.8rem}
+  .kanji-tr,.kanji-br{right:.8rem}
+  .dig-btn{padding:.5rem 1.2rem;min-height:44px}
+  .video-wrap{width:clamp(260px,90vw,560px)}
+  .scene{gap:.5rem}
+  .fortune-text{font-size:clamp(.5rem,1.5vw,.65rem)}
+}
+
+.particles{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.particle{
+  position:absolute;width:3px;height:3px;border-radius:50%;
+  background:rgba(212,113,58,.15);bottom:0;
+  animation:drift linear infinite;
+}
+.particle:nth-child(1){left:12%;animation-duration:18s;width:2px;height:2px}
+.particle:nth-child(2){left:35%;animation-duration:22s;animation-delay:3s;animation-name:driftLeft;background:rgba(212,113,58,.1)}
+.particle:nth-child(3){left:58%;animation-duration:16s;animation-delay:7s;width:2px;height:2px}
+.particle:nth-child(4){left:78%;animation-duration:20s;animation-delay:2s;background:rgba(232,220,200,.1);animation-name:driftWide}
+.particle:nth-child(5){left:25%;animation-duration:24s;animation-delay:10s;width:2px;height:2px;background:rgba(232,220,200,.08)}
+.particle:nth-child(6){left:90%;animation-duration:19s;animation-delay:5s;animation-name:driftLeft;background:rgba(212,113,58,.08)}
+@keyframes drift{
+  0%{transform:translateY(0);opacity:0}
+  5%{opacity:1}
+  95%{opacity:1}
+  100%{transform:translateY(-105vh) translateX(15px);opacity:0}
+}
+@keyframes driftLeft{
+  0%{transform:translateY(0);opacity:0}
+  5%{opacity:1}
+  95%{opacity:1}
+  100%{transform:translateY(-105vh) translateX(-12px);opacity:0}
+}
+@keyframes driftWide{
+  0%{transform:translateY(0);opacity:0}
+  5%{opacity:1}
+  95%{opacity:1}
+  100%{transform:translateY(-105vh) translateX(30px);opacity:0}
+}
+</style>
+</head>
+<body>
+
+<div class="scanlines"></div>
+<div class="speed-lines" id="speedLines"></div>
+<div class="impact" id="impact"></div>
+
+<div class="particles">
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+</div>
+
+<div class="kanji-tl">LOS·ANGELES</div>
+<div class="kanji-tr">UNDERGROUND</div>
+<div class="kanji-bl">VINYL·ONLY</div>
+<div class="kanji-br">34°N·118°W</div>
+
+<div class="scene">
+  <div class="title">FORTUNE DIG</div>
+
+  <div class="crate-wrap" id="crateWrap">
+    <div class="crate">
+      <img src="crate.png" alt="Wooden crate full of vinyl records" class="crate-img" draggable="false" width="781" height="664">
+      <div class="record" id="record">
+        <div class="vinyl">
+          <div class="label">
+            <svg class="label-logo" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+              <!-- arc text: FORTUNE WAX -->
+              <defs>
+                <path id="arc-top" d="M 20,70 Q 100,5 180,70" fill="none"/>
+                <path id="arc-bot" d="M 30,78 Q 100,120 170,78" fill="none"/>
+                <linearGradient id="lens-l" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#6b4c2a" stop-opacity=".6"/>
+                  <stop offset="50%" stop-color="#d4713a" stop-opacity=".4"/>
+                  <stop offset="100%" stop-color="#4a2d6b" stop-opacity=".5"/>
+                </linearGradient>
+                <linearGradient id="lens-r" x1="1" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#4a2d6b" stop-opacity=".5"/>
+                  <stop offset="50%" stop-color="#d4713a" stop-opacity=".4"/>
+                  <stop offset="100%" stop-color="#6b4c2a" stop-opacity=".6"/>
+                </linearGradient>
+              </defs>
+              <text font-family="'Courier New',monospace" font-size="11" font-weight="bold" fill="#5a3e1a" letter-spacing="3">
+                <textPath href="#arc-top" startOffset="50%" text-anchor="middle">FORTUNE WAX</textPath>
+              </text>
+              <!-- sunglasses frame -->
+              <g transform="translate(100,52)">
+                <!-- bridge -->
+                <path d="M -8,0 Q 0,-6 8,0" stroke="#3a2510" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <!-- left lens -->
+                <rect x="-48" y="-10" width="38" height="22" rx="4" fill="url(#lens-l)" stroke="#3a2510" stroke-width="2"/>
+                <!-- right lens -->
+                <rect x="10" y="-10" width="38" height="22" rx="4" fill="url(#lens-r)" stroke="#3a2510" stroke-width="2"/>
+                <!-- temple arms -->
+                <line x1="-48" y1="-4" x2="-58" y2="-8" stroke="#3a2510" stroke-width="2" stroke-linecap="round"/>
+                <line x1="48" y1="-4" x2="58" y2="-8" stroke="#3a2510" stroke-width="2" stroke-linecap="round"/>
+                <!-- JZZO reflected in lenses -->
+                <text x="-29" y="5" font-family="'Courier New',monospace" font-size="12" font-weight="bold" fill="#2a1c0f" text-anchor="middle" opacity=".85">JZ</text>
+                <text x="29" y="5" font-family="'Courier New',monospace" font-size="12" font-weight="bold" fill="#2a1c0f" text-anchor="middle" opacity=".85">ZO</text>
+              </g>
+              <text font-family="'Courier New',monospace" font-size="9" fill="#5a3e1a" letter-spacing="2" opacity=".5">
+                <textPath href="#arc-bot" startOffset="50%" text-anchor="middle">JUST ZIG ZAGGING</textPath>
+              </text>
+            </svg>
+            <div class="label-tagline">運命 · obstacles</div>
+            <div class="fortune-text" id="fortuneText"></div>
+            <div class="label-number" id="labelNumber">FW-001</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dig-hint" id="digHint">▼ DIG IN THE CRATE</div>
+
+  <button class="dig-btn" id="digBtn">DIG AGAIN</button>
+  <div class="video-wrap" id="videoWrap">
+    <div class="video-frame" id="videoFrame"></div>
+    <div class="video-label">NOW PLAYING · <a href="https://www.youtube.com/@jzzo-dyt" target="_blank" rel="noopener" class="jzzo-link">JZZO</a> · LOS ANGELES</div>
+  </div>
+</div>
+
+<div class="milestone" id="milestone"></div>
+<div class="counter" id="counter"></div>
+
+<script>
+const FORTUNES = [
+  "The sample you've been looking for is on the B-side of patience.",
+  "Your next beat will make strangers nod on the train.",
+  "The rarest vinyl is the one nobody else was digging for.",
+  "Every skip in the record taught the groove where to land.",
+  "The dustiest crate holds the brightest gem.",
+  "You don't find the break — the break finds you when your ears are ready.",
+  "Flip the record. The answer was always on the other side.",
+  "The dopest loop is the one you almost passed over.",
+  "Silence between bars hits harder than any 808.",
+  "Whoever said diamonds are rare never dug through a basement in August.",
+  "Your cipher is forming. Stand in it.",
+  "The headphones know things your speakers won't say out loud.",
+  "A true digger never leaves the dollar bin unturned.",
+  "That hiss on the pressing? That's character. Yours too.",
+  "Stop EQing your doubts. Let the raw signal play.",
+  "The train you almost missed is the one carrying your next collab.",
+  "Wax don't lie. Neither should your bars.",
+  "The beat switch in your life is coming. Ride it out.",
+  "Someone out there is sampling your energy right now. Make it knock.",
+  "Real ones press to vinyl. Trends press to streaming and vanish.",
+  "Your wavelength is rare — that's why few can tune in.",
+  "The best drops happen when nobody's counting the bars.",
+  "Even a broken turntable can teach you about rhythm.",
+  "You're not behind. You're on a different BPM.",
+  "The needle finds the groove. Trust the descent.",
+  "That record you keep coming back to? It's trying to tell you something.",
+  "Your ears are the rarest instrument in the room.",
+  "The remix of your day starts now. Chop it different.",
+  "Golden era never ended — it just went underground. Like you.",
+  "Don't chase the drop. Become the drop.",
+  "Static before signal. Struggle before clarity. Always.",
+  "You've been looping the wrong 4 bars. Expand the sample.",
+  "The B-boy stance is a philosophy: stay grounded, stay ready.",
+  "A sealed copy protects nothing. Crack it open and listen.",
+  "Your intuition has perfect pitch. Trust it.",
+  "The crossfade between who you were and who you're becoming is smooth.",
+  "Some frequencies only the late-night crew can hear. You're on that shift.",
+  "Press your truth to wax before someone else presses theirs over it.",
+  "The cratedigger's paradox: the more you find, the more you seek.",
+  "That feeling when the needle drops? That's your life entering the groove.",
+  "Side A is what they expect. Side B is who you really are.",
+  "The rarest pressings were never hyped. They were just honest."
+];
+
+const VIDEOS = [
+  "6bUREOM--is","tPAB4V29D0U","oqX-RBeJdf8","zzygN6SElRM","_Znt0XIzGHk",
+  "6oMeJ9Vvfno","r-1h9aXKMnw","FooJrGE5nz0","soQOReY7plU","Yhg9xX8Wm5c",
+  "Sy05K26R6eQ","k0I4NIZzLow","cnABlfMe4Os","02o5TNO4gms","fkw51ipsFnA",
+  "xHOFJYmJAgo","vrKX_-244LM","z-0FM5LTF5c","yKWciE9pjts","-x9LTivubzA",
+  "ExDBRh5Q7b4","vVKFHrMpaTw","WBNIVLvOVcc","rGv0gX2XLiM","OMRhFt9WPPU",
+  "ylXGhZEwLBg","yipN8ocwZyI","0W0En-PdnvY","PP34hRRmtUw","zL27BEuglNw"
+];
+
+let pool = [];
+let videoPool = [];
+let digCount = 0;
+const record = document.getElementById('record');
+const vinyl = document.querySelector('.vinyl');
+const fortuneText = document.getElementById('fortuneText');
+const labelNumber = document.getElementById('labelNumber');
+const digBtn = document.getElementById('digBtn');
+const crateWrap = document.getElementById('crateWrap');
+const crate = crateWrap.querySelector('.crate');
+const digHint = document.getElementById('digHint');
+const milestone = document.getElementById('milestone');
+const MILESTONES = {5:'DEEP DIGGER',10:'CRATE KING',20:'VINYL ARCHAEOLOGIST',42:'THE ANSWER IS DIG'};
+let currentFortuneIdx = 0;
+const speedLines = document.getElementById('speedLines');
+const impact = document.getElementById('impact');
+const counter = document.getElementById('counter');
+const videoWrap = document.getElementById('videoWrap');
+const videoFrame = document.getElementById('videoFrame');
+let busy = false;
+let videoLoaded = false;
+
+// --- YouTube IFrame API ---
+let ytReady = false;
+let ytPlayer = null;
+const ytTag = document.createElement('script');
+ytTag.src = 'https://www.youtube.com/iframe_api';
+document.head.appendChild(ytTag);
+window.onYouTubeIframeAPIReady = function() { ytReady = true; };
+
+// --- Vinyl rotation state ---
+let angle = 0;
+let spinning = false;
+let scratching = false;
+let lastTime = 0;
+const RPM = 33.33;
+const DEG_PER_MS = (RPM * 360) / 60000;
+
+function spinLoop(ts) {
+  if (!lastTime) lastTime = ts;
+  const dt = ts - lastTime;
+  lastTime = ts;
+  if (spinning && !scratching) {
+    angle = (angle + DEG_PER_MS * dt) % 360;
+  }
+  vinyl.style.transform = 'rotate(' + angle + 'deg)';
+  requestAnimationFrame(spinLoop);
+}
+requestAnimationFrame(spinLoop);
+
+// --- Scratch audio engine ---
+let audioCtx = null;
+let scratchGain = null;
+let scratchSource = null;
+let scratchFilter = null;
+let noiseBuffer = null;
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const len = audioCtx.sampleRate * 2;
+  noiseBuffer = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+  const data = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+
+  scratchFilter = audioCtx.createBiquadFilter();
+  scratchFilter.type = 'bandpass';
+  scratchFilter.frequency.value = 800;
+  scratchFilter.Q.value = 1.5;
+
+  scratchGain = audioCtx.createGain();
+  scratchGain.gain.value = 0;
+
+  scratchSource = audioCtx.createBufferSource();
+  scratchSource.buffer = noiseBuffer;
+  scratchSource.loop = true;
+  scratchSource.connect(scratchFilter);
+  scratchFilter.connect(scratchGain);
+  scratchGain.connect(audioCtx.destination);
+  scratchSource.start();
+}
+
+function scratchOn(speed) {
+  if (!audioCtx) return;
+  const absSpeed = Math.min(Math.abs(speed), 15);
+  const vol = Math.min(absSpeed / 4, 0.7);
+  const freq = 400 + absSpeed * 200;
+  scratchGain.gain.setTargetAtTime(vol, audioCtx.currentTime, 0.02);
+  scratchFilter.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.02);
+}
+
+function scratchOff() {
+  if (!audioCtx) return;
+  scratchGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
+}
+
+// --- Scratch drag interaction ---
+let dragStartAngle = 0;
+let dragLastAngle = 0;
+let dragSpeed = 0;
+
+function getAngleFromEvent(e, el) {
+  const rect = el.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const x = (e.touches ? e.touches[0].clientX : e.clientX) - cx;
+  const y = (e.touches ? e.touches[0].clientY : e.clientY) - cy;
+  return Math.atan2(y, x) * (180 / Math.PI);
+}
+
+function onScratchStart(e) {
+  if (!record.classList.contains('digging')) return;
+  const rect = vinyl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const px = e.touches ? e.touches[0].clientX : e.clientX;
+  const py = e.touches ? e.touches[0].clientY : e.clientY;
+  if (Math.sqrt((px - cx) ** 2 + (py - cy) ** 2) > rect.width / 2) return;
+  e.preventDefault();
+  initAudio();
+  scratching = true;
+  vinyl.classList.add('scratching');
+  dragStartAngle = getAngleFromEvent(e, vinyl);
+  dragLastAngle = dragStartAngle;
+  dragSpeed = 0;
+}
+
+function onScratchMove(e) {
+  if (!scratching) return;
+  e.preventDefault();
+  const current = getAngleFromEvent(e, vinyl);
+  let delta = current - dragLastAngle;
+  if (delta > 180) delta -= 360;
+  if (delta < -180) delta += 360;
+  angle = (angle + delta + 360) % 360;
+  dragSpeed = delta;
+  dragLastAngle = current;
+  scratchOn(dragSpeed);
+}
+
+function onScratchEnd() {
+  if (!scratching) return;
+  scratching = false;
+  vinyl.classList.remove('scratching');
+  scratchOff();
+}
+
+vinyl.addEventListener('mousedown', onScratchStart);
+vinyl.addEventListener('touchstart', onScratchStart, { passive: false });
+window.addEventListener('mousemove', onScratchMove);
+window.addEventListener('touchmove', onScratchMove, { passive: false });
+window.addEventListener('mouseup', onScratchEnd);
+window.addEventListener('touchend', onScratchEnd);
+
+// --- Shuffle pools ---
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function refillPool() { pool = shuffle([...Array(FORTUNES.length).keys()]); }
+function refillVideoPool() { videoPool = shuffle([...Array(VIDEOS.length).keys()]); }
+function pickFortune() { if (!pool.length) refillPool(); return pool.pop(); }
+function pickVideo() { if (!videoPool.length) refillVideoPool(); return VIDEOS[videoPool.pop()]; }
+
+let typewriterTimer = null;
+function typewrite(el, text, speed, onDone) {
+  if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+  el.textContent = '';
+  let i = 0;
+  typewriterTimer = setInterval(() => {
+    el.textContent += text[i];
+    i++;
+    if (i >= text.length) { clearInterval(typewriterTimer); typewriterTimer = null; if (onDone) onDone(); }
+  }, speed);
+}
+
+function dig() {
+  if (busy) return;
+  busy = true;
+  if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+  spinning = false;
+  videoLoaded = false;
+
+  const wasRevealed = record.classList.contains('digging');
+
+  if (ytPlayer) { try { ytPlayer.destroy(); } catch(e) {} ytPlayer = null; }
+  videoWrap.classList.remove('visible');
+  videoFrame.innerHTML = '';
+
+  if (wasRevealed) {
+    record.classList.remove('digging');
+    record.classList.add('resetting');
+    digBtn.classList.remove('visible');
+    setTimeout(() => {
+      record.classList.remove('resetting');
+      doReveal();
+    }, 320);
+  } else {
+    doReveal();
+  }
+}
+
+function doReveal() {
+  const idx = pickFortune();
+  digCount++;
+  currentFortuneIdx = idx;
+  if (digHint) digHint.style.display = 'none';
+  if (MILESTONES[digCount]) {
+    milestone.textContent = MILESTONES[digCount];
+    milestone.classList.remove('active');
+    void milestone.offsetWidth;
+    milestone.classList.add('active');
+    counter.classList.add('flash');
+    setTimeout(() => counter.classList.remove('flash'), 2000);
+  }
+  fortuneText.textContent = '';
+  labelNumber.textContent = 'FW-' + String(idx + 1).padStart(3, '0');
+  counter.textContent = digCount + ' / ' + FORTUNES.length;
+
+  speedLines.classList.remove('active');
+  impact.classList.remove('active');
+  void speedLines.offsetWidth;
+
+  record.classList.add('digging');
+  crate.classList.add('dug');
+  speedLines.classList.add('active');
+  setTimeout(() => typewrite(fortuneText, FORTUNES[idx], 25), 900);
+
+  setTimeout(() => { impact.classList.add('active'); }, 350);
+
+  setTimeout(() => {
+    digBtn.classList.add('visible');
+
+    const vid = pickVideo();
+    if (ytReady) {
+      const div = document.createElement('div');
+      div.id = 'yt-' + Date.now();
+      videoFrame.appendChild(div);
+      ytPlayer = new YT.Player(div.id, {
+        videoId: vid,
+        playerVars: { autoplay: 1, rel: 0, modestbranding: 1 },
+        events: {
+          onReady: function(e) { e.target.playVideo(); },
+          onStateChange: function(e) {
+            if (e.data === YT.PlayerState.PLAYING) { spinning = true; lastTime = 0; }
+            else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) { spinning = false; }
+          }
+        }
+      });
+    } else {
+      videoFrame.innerHTML = '<iframe src="https://www.youtube.com/embed/' + vid +
+        '?autoplay=1&rel=0&modestbranding=1&enablejsapi=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+      spinning = true;
+      lastTime = 0;
+    }
+    videoWrap.classList.add('visible');
+    videoLoaded = true;
+
+    busy = false;
+  }, 800);
+}
+
+crateWrap.addEventListener('click', function() {
+  if (!record.classList.contains('digging') && !record.classList.contains('resetting')) dig();
+});
+digBtn.addEventListener('click', dig);
+refillPool();
+refillVideoPool();
+</script>
+</body>
+</html>
