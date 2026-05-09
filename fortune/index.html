@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dig the Crate · JZZO</title>
+<meta name="description" content="Pull a record from the crate. Read your fortune. Underground hip-hop fortunes by JZZO.">
+<meta property="og:title" content="Dig the Crate · JZZO">
+<meta property="og:description" content="Pull a record. Read your fortune. Share the wax.">
+<meta property="og:image" content="/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://jzzo.sdfkjh.com/fortune/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Dig the Crate · JZZO">
+<meta name="twitter:description" content="Pull a record. Read your fortune. Share the wax.">
+<meta name="twitter:image" content="/og.png">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0a; --bg-elev: #131313; --fg: #ffffff;
+    --fg-dim: rgba(255,255,255,0.7); --fg-mute: rgba(255,255,255,0.5); --fg-faint: rgba(255,255,255,0.4);
+    --line: rgba(255,255,255,0.1); --line-strong: rgba(255,255,255,0.2);
+    --accent: #ff5a3c; --yt-red: #ff0000;
+    --label-bg: #c4a96a;
+    --radius: 8px; --radius-lg: 12px; --max: 1100px;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  }
+  html, body { background: var(--bg); color: var(--fg); font-family: var(--sans); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; overscroll-behavior-y: none; }
+  body { min-height: 100vh; line-height: 1.5; }
+  a { color: inherit; text-decoration: none; }
+  a:hover { opacity: 0.85; }
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+
+  .nav { position: sticky; top: 0; z-index: 50; background: rgba(10,10,10,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; }
+  .logo { display: flex; align-items: baseline; gap: 8px; font-weight: 600; letter-spacing: 0.05em; font-size: 15px; }
+  .logo-tag { font-family: var(--mono); font-size: 11px; color: var(--fg-faint); font-weight: 400; }
+  .nav-links { display: flex; gap: 28px; font-size: 13px; color: var(--fg-dim); }
+  .nav-links a:hover { color: var(--fg); opacity: 1; }
+  .nav-links a.active { color: var(--fg); }
+  .nav-toggle { display: none; background: none; border: none; color: var(--fg); cursor: pointer; font-size: 22px; }
+
+  .hero { text-align: center; padding: 56px 0 24px; }
+  .hero-tagline { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.25em; margin-bottom: 18px; }
+  .hero h1 { font-size: clamp(40px, 6vw, 64px); font-weight: 600; letter-spacing: -0.03em; line-height: 1; margin-bottom: 14px; }
+  .hero-sub { color: var(--fg-dim); font-size: 16px; max-width: 460px; margin: 0 auto; line-height: 1.6; }
+  .hero-counter { font-family: var(--mono); font-size: 11px; color: var(--fg-faint); letter-spacing: 0.15em; margin-top: 16px; }
+
+  .stage { padding: 24px 0 56px; }
+  .stage-inner { max-width: 720px; margin: 0 auto; background: linear-gradient(180deg, #1a1410 0%, #0e0a08 100%); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 32px 28px 32px; text-align: center; position: relative; overflow: hidden; }
+  .stage-inner::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 60%; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0.4; }
+
+  /* --- Crate + record stack from live, restyled chrome --- */
+  .crate-stage { position: relative; padding-top: clamp(160px, 32vw, 220px); }
+  .crate-wrap { position: relative; cursor: pointer; -webkit-tap-highlight-color: transparent; display: inline-block; }
+  .crate { width: clamp(200px, 50vw, 280px); position: relative; overflow: visible; animation: cratePulse 3s ease-in-out infinite; }
+  .crate-img { width: 100%; height: auto; display: block; user-select: none; -webkit-user-drag: none; pointer-events: none; max-height: 400px; }
+  .crate.dug { animation: none; }
+  .crate.dug .crate-img { animation: crateAway 0.7s ease 0.3s forwards; }
+  @keyframes crateAway {
+    0%   { opacity: 1; transform: none; max-height: 400px; }
+    50%  { opacity: 0; transform: translateY(20px); max-height: 400px; }
+    100% { opacity: 0; transform: translateY(20px); max-height: 0; }
+  }
+  @keyframes cratePulse {
+    0%, 100% { filter: drop-shadow(0 8px 18px rgba(0,0,0,0.6)); }
+    50%      { filter: drop-shadow(0 8px 18px rgba(0,0,0,0.6)) drop-shadow(0 0 22px rgba(255,90,60,0.18)); }
+  }
+
+  .crate-floor { width: clamp(200px, 50vw, 280px); margin: 24px auto 0; opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease 0.3s, transform 0.9s cubic-bezier(0.23, 1, 0.32, 1) 0.3s; pointer-events: none; }
+  .crate-floor.show { opacity: 1; transform: translateY(0); }
+  .crate-floor img { width: 100%; height: auto; display: block; user-select: none; -webkit-user-drag: none; filter: brightness(0.7) saturate(0.85) drop-shadow(0 -8px 22px rgba(0,0,0,0.55)); }
+
+  .record { position: absolute; top: 0; left: 50%; width: clamp(140px, 35vw, 180px); height: clamp(140px, 35vw, 180px); transform: translate(-50%, 20%); opacity: 0; pointer-events: none; transition: none; }
+  .record.digging { animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; pointer-events: auto; }
+  .record.resetting { animation: slideDown 0.3s ease-in forwards; }
+  @keyframes slideUp {
+    0%   { transform: translate(-50%, 20%); opacity: 0; }
+    30%  { opacity: 1; }
+    70%  { transform: translate(-50%, -104%); opacity: 1; }
+    85%  { transform: translate(-50%, -96%); }
+    100% { transform: translate(-50%, -100%); opacity: 1; }
+  }
+  @keyframes slideDown {
+    0%   { transform: translate(-50%, -100%); opacity: 1; }
+    70%  { opacity: 1; }
+    100% { transform: translate(-50%, 20%); opacity: 0; }
+  }
+
+  .vinyl {
+    width: 100%; height: 100%; border-radius: 50%; position: relative; touch-action: none;
+    background: radial-gradient(circle, transparent 18%,
+      #111 19%, #0d0d0d 20%, #1a1a1a 21%, #111 22%,
+      #1a1a1a 24%, #111 25%, #1a1a1a 27%, #111 28%,
+      #1a1a1a 30%, #0f0f0f 31%, #1a1a1a 33%, #111 34%,
+      #1a1a1a 36%, #111 37%, #1a1a1a 39%, #0d0d0d 40%,
+      #1a1a1a 42%, #111 43%, #1a1a1a 45%, #111 46%,
+      #1a1a1a 48%, #111 49%, #1a1a1a 50%);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.5), inset 0 0 60px rgba(0,0,0,0.3);
+  }
+  .vinyl::after { content: ''; position: absolute; top: 50%; left: 50%; width: 6%; height: 6%; border-radius: 50%; background: #222; border: 1px solid #333; transform: translate(-50%, -50%); }
+  .record::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.04) 44%, rgba(255,255,255,0.09) 50%, rgba(255,255,255,0.04) 56%, transparent 70%); pointer-events: none; z-index: 3; }
+  .record.digging .vinyl { cursor: grab; }
+  .record.digging .vinyl.scratching { cursor: grabbing; }
+
+  .label {
+    position: absolute; top: 50%; left: 50%; width: 52%; height: 52%; border-radius: 50%;
+    transform: translate(-50%, -50%); background: var(--label-bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 8% 10%; text-align: center; overflow: hidden;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.2); z-index: 1;
+    font-family: 'Courier New', monospace;
+  }
+  .label::before {
+    content: ''; position: absolute; inset: 0; border-radius: 50%;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+    opacity: 0.5; pointer-events: none;
+  }
+  .label-logo { width: 85%; max-width: 120px; margin-bottom: 2px; }
+  .label-tagline { font-size: clamp(0.28rem, 0.7vw, 0.38rem); letter-spacing: 0.2em; text-transform: uppercase; color: #5a3e1a; margin-bottom: 3px; font-weight: bold; opacity: 0.6; }
+  .label-fortune { font-size: clamp(0.45rem, 1.3vw, 0.65rem); line-height: 1.35; color: #2a1c0f; font-weight: bold; max-height: 50%; overflow: hidden; }
+  .label-number { font-size: clamp(0.28rem, 0.6vw, 0.36rem); color: rgba(90, 62, 26, 0.3); margin-top: 3px; letter-spacing: 0.15em; }
+  .record.digging .label { animation: labelReveal 0.4s ease-out 0.4s both; }
+  @keyframes labelReveal {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+
+  .dig-hint { font-family: var(--mono); font-size: 12px; letter-spacing: 0.3em; color: var(--fg-mute); text-transform: uppercase; margin: 28px 0 8px; animation: hintPulse 1.8s ease-in-out infinite; }
+  @keyframes hintPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.85; } }
+  .dig-hint.gone { display: none; }
+
+  .fortune-display { min-height: 80px; display: none; flex-direction: column; align-items: center; justify-content: center; margin: 24px auto 4px; max-width: 540px; }
+  .fortune-display.show { display: flex; }
+  .fortune-display.fading { opacity: 0.4; transition: opacity 0.2s ease; }
+  .fortune-id { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.2em; margin-bottom: 12px; }
+  .fortune-text { font-size: clamp(18px, 2.5vw, 22px); font-weight: 500; line-height: 1.4; letter-spacing: -0.01em; }
+  .fortune-meta { font-family: var(--mono); font-size: 10px; color: var(--fg-faint); letter-spacing: 0.15em; margin-top: 14px; }
+
+  .video-wrap { width: 100%; max-width: 560px; margin: 24px auto 0; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+  .video-wrap.show { opacity: 1; pointer-events: auto; }
+  .video-frame { position: relative; width: 100%; padding-bottom: 56.25%; border: 1px solid var(--line-strong); border-radius: var(--radius); overflow: hidden; background: #111; box-shadow: 0 4px 30px rgba(0,0,0,0.5); }
+  .video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+  .video-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; color: var(--fg-faint); text-transform: uppercase; margin-top: 10px; }
+  .video-label a { color: var(--fg-mute); border-bottom: 1px solid var(--line-strong); }
+  .video-label a:hover { color: var(--fg); }
+
+  .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 24px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: var(--radius); font-size: 14px; font-weight: 500; cursor: pointer; border: 1px solid var(--line-strong); background: transparent; color: var(--fg); font-family: inherit; transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease; }
+  .btn:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.4); }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .btn-primary:hover { background: #ff7059; border-color: #ff7059; opacity: 1; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .milestone { position: fixed; top: 35%; left: 50%; transform: translate(-50%, -50%); font-family: var(--mono); font-size: clamp(14px, 2.6vw, 22px); letter-spacing: 0.4em; text-transform: uppercase; color: var(--accent); text-shadow: 0 0 30px rgba(255,90,60,0.5), 0 0 60px rgba(255,90,60,0.2); pointer-events: none; z-index: 80; opacity: 0; }
+  .milestone.active { animation: milestoneFlash 2s ease-out forwards; }
+  @keyframes milestoneFlash {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    15%  { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+    30%  { transform: translate(-50%, -50%) scale(1); }
+    80%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+  }
+
+  .history-section { padding: 48px 0 32px; border-top: 1px solid var(--line); }
+  .history-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; }
+  .history-head h2 { font-size: 18px; font-weight: 500; }
+  .history-clear { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.15em; background: none; border: none; cursor: pointer; }
+  .history-clear:hover { color: var(--fg); }
+  .history { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .history-card { background: rgba(255,255,255,0.03); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: block; cursor: pointer; }
+  .history-card:hover { border-color: var(--line-strong); opacity: 1; }
+  .history-id { font-family: var(--mono); font-size: 10px; color: var(--fg-faint); letter-spacing: 0.15em; margin-bottom: 6px; }
+  .history-text { font-size: 13px; color: var(--fg-dim); line-height: 1.5; }
+  .history-empty { color: var(--fg-faint); font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-align: center; padding: 24px 0; }
+
+  footer { padding: 32px 0; border-top: 1px solid var(--line); }
+  .footer-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+  .footer-loc { font-family: var(--mono); font-size: 10px; color: var(--fg-faint); letter-spacing: 0.2em; }
+  .socials { display: flex; gap: 16px; }
+  .socials a { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: var(--radius); color: var(--fg-mute); transition: color 0.15s ease, background 0.15s ease; }
+  .socials a:hover { color: var(--fg); background: rgba(255,255,255,0.05); opacity: 1; }
+  .socials svg { width: 18px; height: 18px; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--fg); color: var(--bg); padding: 10px 18px; border-radius: var(--radius); font-size: 13px; font-weight: 500; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.3, 1); z-index: 100; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 640px) {
+    .nav-links { display: none; }
+    .nav-toggle { display: block; }
+    .hero { padding: 40px 0 16px; }
+    .stage-inner { padding: 24px 18px 28px; }
+    .crate-stage { padding-top: clamp(140px, 38vw, 200px); }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <a href="/" class="logo">JZZO <span class="logo-tag">· LA</span></a>
+    <div class="nav-links">
+      <a href="/#videos">Videos</a>
+      <a href="/fortune/" class="active">Fortune Dig</a>
+      <a href="/#store">Store</a>
+      <a href="/#about">About</a>
+    </div>
+    <button class="nav-toggle" aria-label="Menu">☰</button>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-tagline">UNDERGROUND · VINYL · LOS ANGELES</div>
+    <h1>Dig the Crate</h1>
+    <p class="hero-sub">Pull a record from the crate. Read your fortune. Share the wax.</p>
+    <div class="hero-counter" id="counter">FW SERIES · LOADING…</div>
+  </div>
+</header>
+
+<section class="stage">
+  <div class="wrap">
+    <div class="stage-inner">
+
+      <div class="crate-stage">
+        <div class="crate-wrap" id="crateWrap">
+          <div class="crate">
+            <img src="/crate.png" alt="Wooden crate full of vinyl records" class="crate-img" draggable="false" width="781" height="664">
+            <div class="record" id="record">
+              <div class="vinyl">
+                <div class="label">
+                  <svg class="label-logo" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <path id="arc-top" d="M 20,70 Q 100,5 180,70" fill="none"/>
+                      <path id="arc-bot" d="M 30,78 Q 100,120 170,78" fill="none"/>
+                      <linearGradient id="lens-l" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#6b4c2a" stop-opacity=".6"/>
+                        <stop offset="50%" stop-color="#d4713a" stop-opacity=".4"/>
+                        <stop offset="100%" stop-color="#4a2d6b" stop-opacity=".5"/>
+                      </linearGradient>
+                      <linearGradient id="lens-r" x1="1" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#4a2d6b" stop-opacity=".5"/>
+                        <stop offset="50%" stop-color="#d4713a" stop-opacity=".4"/>
+                        <stop offset="100%" stop-color="#6b4c2a" stop-opacity=".6"/>
+                      </linearGradient>
+                    </defs>
+                    <text font-family="'Courier New',monospace" font-size="11" font-weight="bold" fill="#5a3e1a" letter-spacing="3">
+                      <textPath href="#arc-top" startOffset="50%" text-anchor="middle">FORTUNE WAX</textPath>
+                    </text>
+                    <g transform="translate(100,52)">
+                      <path d="M -8,0 Q 0,-6 8,0" stroke="#3a2510" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                      <rect x="-48" y="-10" width="38" height="22" rx="4" fill="url(#lens-l)" stroke="#3a2510" stroke-width="2"/>
+                      <rect x="10" y="-10" width="38" height="22" rx="4" fill="url(#lens-r)" stroke="#3a2510" stroke-width="2"/>
+                      <line x1="-48" y1="-4" x2="-58" y2="-8" stroke="#3a2510" stroke-width="2" stroke-linecap="round"/>
+                      <line x1="48" y1="-4" x2="58" y2="-8" stroke="#3a2510" stroke-width="2" stroke-linecap="round"/>
+                      <text x="-29" y="5" font-family="'Courier New',monospace" font-size="12" font-weight="bold" fill="#2a1c0f" text-anchor="middle" opacity=".85">JZ</text>
+                      <text x="29" y="5" font-family="'Courier New',monospace" font-size="12" font-weight="bold" fill="#2a1c0f" text-anchor="middle" opacity=".85">ZO</text>
+                    </g>
+                    <text font-family="'Courier New',monospace" font-size="9" fill="#5a3e1a" letter-spacing="2" opacity=".5">
+                      <textPath href="#arc-bot" startOffset="50%" text-anchor="middle">JUST ZIG ZAGGING</textPath>
+                    </text>
+                  </svg>
+                  <div class="label-tagline">OBSTACLES</div>
+                  <div class="label-fortune" id="labelFortune"></div>
+                  <div class="label-number" id="labelNumber">FW-—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dig-hint" id="digHint">▼ DIG IN THE CRATE</div>
+
+      <div class="fortune-display" id="fortuneDisplay">
+        <div class="fortune-id" id="fortuneId">FW-—</div>
+        <div class="fortune-text" id="fortuneText"></div>
+        <div class="fortune-meta">JZZO · LOS ANGELES</div>
+      </div>
+
+      <div class="video-wrap" id="videoWrap">
+        <div class="video-frame" id="videoFrame"></div>
+        <div class="video-label">NOW PLAYING · <a href="https://www.youtube.com/@jzzo-dyt" target="_blank" rel="noopener">JZZO</a> · LOS ANGELES</div>
+      </div>
+
+      <div class="crate-floor" id="crateFloor"><img src="/crate.png" alt="" draggable="false"></div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="digBtn">▼ Dig in the crate</button>
+        <button class="btn" id="shareBtn" disabled>Share</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="history-section">
+  <div class="wrap">
+    <div class="history-head">
+      <h2>Your dig history</h2>
+      <button class="history-clear" id="clearHistoryBtn">CLEAR ↺</button>
+    </div>
+    <div class="history" id="history">
+      <div class="history-empty" style="grid-column: 1 / -1;">NOTHING PULLED YET</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-inner">
+    <div class="footer-loc">34°N · 118°W · LOS ANGELES</div>
+    <div class="socials">
+      <a href="https://www.youtube.com/@jzzo-dyt" target="_blank" rel="noopener" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+      <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg></a>
+      <a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43V8.41a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.84-.27z"/></svg></a>
+      <a href="mailto:hello@jzzo.sdfkjh.com" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg></a>
+    </div>
+  </div>
+</footer>
+
+<div class="milestone" id="milestone"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+  // ---------- FORTUNES ----------
+  const FORTUNES = [
+    "Trust the B-side. The single is a lie.",
+    "Your next breakthrough is in someone else's reject pile.",
+    "The crate does not reward patience. It rewards arrival.",
+    "Sample the silence between the snares.",
+    "An old loop will solve a new problem.",
+    "Stop chasing the rare. Master the common.",
+    "The cheapest record in the bin is teaching you something.",
+    "Run it back. The mistake was the take.",
+    "Quantize less this week.",
+    "What you call a flaw, the room calls character.",
+    "The drum break you need has been there the whole time.",
+    "Trust dust over gloss.",
+    "The producer you admire is also faking it.",
+    "Your taste outpaces your technique. Keep going.",
+    "Listen to one record all the way through today.",
+    "Borrow the feel. Build the rest.",
+    "A 45 will change your week.",
+    "Stop polishing. Start finishing.",
+    "The hook is hiding behind the third verse.",
+    "Dig somewhere humid.",
+    "An obstacle on the way to the beat is the beat.",
+    "If it's not zig-zagging, it's not done.",
+    "The room you're in is the second instrument.",
+    "Bounce it tonight. Listen tomorrow.",
+    "Steal the mood, not the melody.",
+    "The wrong record at the right time is the right record.",
+    "Your favorite producer was once where you are now. Right now.",
+    "Cut the intro in half.",
+    "A good drum break is a small inheritance. Spend it.",
+    "Whatever you're avoiding mixing — that's the song."
+  ];
+
+  // Sourced from Joe's channel playlists (@jzzo-dyt)
+  const AESOP_VIDEOS = [
+    "rQK1EZQ5-cA","twYGJ4Biy7Y","svmw3np9JEE","pR5GS6j1IfI","k05VlnI1a8g",
+    "7YpBTS6UOFg","z43DWCjgR8U","OaH4KGQSBso","5tr58_cgmjc","EQHgi-H7Iz0",
+    "amC-FLQaHqk","KQPK1E5hg5I","48-Qjhfde7M","5X2mrf15rl0","LnJ51mDYHBU",
+    "Svxd49HhhiA","fCA0tdMDlRE","1N6Kw24TGds"
+  ];
+  const DOOM_VIDEOS = [
+    "eGboqzDjio4","NKTbpt8k56w","Te1PAswX-ZQ","gwX9Kchtmyg",
+    "99ASysmzBYU","6kWV0SuKC0k","UoB9PRTwlzA"
+  ];
+  const MILESTONES = { 5: 'DEEP DIGGER', 10: 'CRATE KING', 20: 'VINYL ARCHAEOLOGIST', 30: 'THE ANSWER IS DIG' };
+
+  const HISTORY_KEY = 'jzzo-fortune-history';
+  const MAX_HISTORY = 8;
+
+  const $ = id => document.getElementById(id);
+  const record       = $('record');
+  const vinyl        = document.querySelector('.vinyl');
+  const labelFortune = $('labelFortune');
+  const labelNumber  = $('labelNumber');
+  const crateWrap    = $('crateWrap');
+  const crate        = crateWrap.querySelector('.crate');
+  const crateFloor   = $('crateFloor');
+  const digHint      = $('digHint');
+  const digBtn       = $('digBtn');
+  const shareBtn     = $('shareBtn');
+  const fortuneDisplay = $('fortuneDisplay');
+  const fortuneId    = $('fortuneId');
+  const fortuneText  = $('fortuneText');
+  const milestone    = $('milestone');
+  const counter      = $('counter');
+  const videoWrap    = $('videoWrap');
+  const videoFrame   = $('videoFrame');
+
+  let pullCount = 0;
+  let currentFortuneIdx = null;
+  let busy = false;
+
+  // ---------- YouTube IFrame API ----------
+  let ytReady = false;
+  let ytPlayer = null;
+  const ytTag = document.createElement('script');
+  ytTag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(ytTag);
+  window.onYouTubeIframeAPIReady = function () { ytReady = true; };
+
+  // ---------- Vinyl rotation (33⅓ rpm while playing, paused while scratching) ----------
+  let angle = 0, spinning = false, scratching = false, lastTime = 0;
+  const RPM = 33.33;
+  const DEG_PER_MS = (RPM * 360) / 60000;
+  function spinLoop(ts) {
+    if (!lastTime) lastTime = ts;
+    const dt = ts - lastTime; lastTime = ts;
+    if (spinning && !scratching) angle = (angle + DEG_PER_MS * dt) % 360;
+    vinyl.style.transform = 'rotate(' + angle + 'deg)';
+    requestAnimationFrame(spinLoop);
+  }
+  requestAnimationFrame(spinLoop);
+
+  // ---------- Web Audio scratch ----------
+  let audioCtx = null, scratchGain = null, scratchSource = null, scratchFilter = null, noiseBuffer = null;
+  function initAudio() {
+    if (audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const len = audioCtx.sampleRate * 2;
+    noiseBuffer = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    scratchFilter = audioCtx.createBiquadFilter();
+    scratchFilter.type = 'bandpass'; scratchFilter.frequency.value = 800; scratchFilter.Q.value = 1.5;
+    scratchGain = audioCtx.createGain(); scratchGain.gain.value = 0;
+    scratchSource = audioCtx.createBufferSource();
+    scratchSource.buffer = noiseBuffer; scratchSource.loop = true;
+    scratchSource.connect(scratchFilter); scratchFilter.connect(scratchGain); scratchGain.connect(audioCtx.destination);
+    scratchSource.start();
+  }
+  function scratchOn(speed) {
+    if (!audioCtx) return;
+    const abs = Math.min(Math.abs(speed), 15);
+    scratchGain.gain.setTargetAtTime(Math.min(abs / 4, 0.7), audioCtx.currentTime, 0.02);
+    scratchFilter.frequency.setTargetAtTime(400 + abs * 200, audioCtx.currentTime, 0.02);
+  }
+  function scratchOff() {
+    if (!audioCtx) return;
+    scratchGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
+  }
+
+  let dragLastAngle = 0;
+  function getAngleFromEvent(e, el) {
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - cx;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - cy;
+    return Math.atan2(y, x) * (180 / Math.PI);
+  }
+  function onScratchStart(e) {
+    if (!record.classList.contains('digging')) return;
+    const r = vinyl.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const px = e.touches ? e.touches[0].clientX : e.clientX;
+    const py = e.touches ? e.touches[0].clientY : e.clientY;
+    if (Math.sqrt((px - cx) ** 2 + (py - cy) ** 2) > r.width / 2) return;
+    e.preventDefault(); initAudio();
+    scratching = true; vinyl.classList.add('scratching');
+    dragLastAngle = getAngleFromEvent(e, vinyl);
+  }
+  function onScratchMove(e) {
+    if (!scratching) return; e.preventDefault();
+    const cur = getAngleFromEvent(e, vinyl);
+    let delta = cur - dragLastAngle;
+    if (delta > 180) delta -= 360;
+    if (delta < -180) delta += 360;
+    angle = (angle + delta + 360) % 360;
+    dragLastAngle = cur;
+    scratchOn(delta);
+  }
+  function onScratchEnd() {
+    if (!scratching) return;
+    scratching = false; vinyl.classList.remove('scratching'); scratchOff();
+  }
+  vinyl.addEventListener('mousedown', onScratchStart);
+  vinyl.addEventListener('touchstart', onScratchStart, { passive: false });
+  window.addEventListener('mousemove', onScratchMove);
+  window.addEventListener('touchmove', onScratchMove, { passive: false });
+  window.addEventListener('mouseup', onScratchEnd);
+  window.addEventListener('touchend', onScratchEnd);
+
+  // ---------- Shuffled pools (no repeats until pool empties) ----------
+  function shuffle(a) { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  let fortunePool = [], aesopPool = [], doomPool = [];
+  function refillFortunes() { fortunePool = shuffle([...Array(FORTUNES.length).keys()]); }
+  function refillAesop() { aesopPool = shuffle([...Array(AESOP_VIDEOS.length).keys()]); }
+  function refillDoom()  { doomPool  = shuffle([...Array(DOOM_VIDEOS.length).keys()]); }
+  function pickFortune(excludeIdx) {
+    if (!fortunePool.length) refillFortunes();
+    let idx = fortunePool.pop();
+    if (excludeIdx !== null && idx === excludeIdx && fortunePool.length) {
+      const swap = fortunePool.pop();
+      fortunePool.push(idx);
+      idx = swap;
+    }
+    return idx;
+  }
+  function pickVideo() {
+    if (Math.random() < 0.5) {
+      if (!aesopPool.length) refillAesop();
+      return AESOP_VIDEOS[aesopPool.pop()];
+    }
+    if (!doomPool.length) refillDoom();
+    return DOOM_VIDEOS[doomPool.pop()];
+  }
+  refillFortunes(); refillAesop(); refillDoom();
+
+  // ---------- Typewriter ----------
+  let typewriterTimer = null;
+  function typewrite(el, text, speed, onDone) {
+    if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+    el.textContent = '';
+    let i = 0;
+    typewriterTimer = setInterval(() => {
+      el.textContent += text[i]; i++;
+      if (i >= text.length) { clearInterval(typewriterTimer); typewriterTimer = null; if (onDone) onDone(); }
+    }, speed);
+  }
+
+  // ---------- Dig flow ----------
+  function dig() {
+    if (busy) return;
+    busy = true;
+    if (typewriterTimer) { clearInterval(typewriterTimer); typewriterTimer = null; }
+    spinning = false;
+
+    const wasRevealed = record.classList.contains('digging');
+    if (ytPlayer) { try { ytPlayer.destroy(); } catch (e) {} ytPlayer = null; }
+    videoWrap.classList.remove('show');
+    videoFrame.innerHTML = '';
+
+    if (wasRevealed) {
+      record.classList.remove('digging');
+      record.classList.add('resetting');
+      fortuneDisplay.classList.add('fading');
+      setTimeout(() => { record.classList.remove('resetting'); doReveal(); }, 320);
+    } else {
+      doReveal();
+    }
+  }
+
+  function doReveal() {
+    const idx = pickFortune(currentFortuneIdx);
+    const id = idx + 1;
+    const padded = String(id).padStart(3, '0');
+    currentFortuneIdx = idx;
+    pullCount++;
+
+    digHint.classList.add('gone');
+    digBtn.textContent = '▼ Dig again';
+    shareBtn.disabled = false;
+
+    if (MILESTONES[pullCount]) {
+      milestone.textContent = MILESTONES[pullCount];
+      milestone.classList.remove('active');
+      void milestone.offsetWidth;
+      milestone.classList.add('active');
+    }
+
+    labelFortune.textContent = '';
+    labelNumber.textContent = 'FW-' + padded;
+
+    record.classList.add('digging');
+    crate.classList.add('dug');
+    crateFloor.classList.add('show');
+
+    fortuneId.textContent = 'FW-' + padded;
+    fortuneText.textContent = '';
+    fortuneDisplay.classList.add('show');
+    fortuneDisplay.classList.remove('fading');
+
+    setTimeout(() => {
+      typewrite(labelFortune, FORTUNES[idx], 25);
+      typewrite(fortuneText, '"' + FORTUNES[idx] + '"', 22);
+    }, 900);
+
+    saveToHistory(id, FORTUNES[idx]);
+    history.replaceState({}, '', location.pathname + '?fw=' + id);
+
+    setTimeout(() => {
+      const vid = pickVideo();
+      if (ytReady) {
+        const div = document.createElement('div');
+        div.id = 'yt-' + Date.now();
+        videoFrame.appendChild(div);
+        ytPlayer = new YT.Player(div.id, {
+          videoId: vid,
+          playerVars: { autoplay: 1, rel: 0, modestbranding: 1 },
+          events: {
+            onReady: e => e.target.playVideo(),
+            onStateChange: e => {
+              if (e.data === YT.PlayerState.PLAYING) { spinning = true; lastTime = 0; }
+              else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) { spinning = false; }
+            }
+          }
+        });
+      } else {
+        videoFrame.innerHTML = '<iframe src="https://www.youtube.com/embed/' + vid +
+          '?autoplay=1&rel=0&modestbranding=1&enablejsapi=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
+        spinning = true; lastTime = 0;
+      }
+      videoWrap.classList.add('show');
+      busy = false;
+    }, 800);
+  }
+
+  // ---------- Deep-link load (?fw=N) shows the fortune card without auto-spinning ----------
+  function showFortuneFromLink(idx) {
+    const id = idx + 1;
+    const padded = String(id).padStart(3, '0');
+    currentFortuneIdx = idx;
+    digHint.classList.add('gone');
+    fortuneId.textContent = 'FW-' + padded;
+    fortuneText.textContent = '"' + FORTUNES[idx] + '"';
+    fortuneDisplay.classList.add('show');
+    shareBtn.disabled = false;
+    digBtn.textContent = '▼ Dig in the crate';
+  }
+
+  // ---------- History ----------
+  function getHistory() { try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch { return []; } }
+  function saveToHistory(id, text) {
+    let h = getHistory();
+    h = h.filter(item => item.id !== id);
+    h.unshift({ id, text, t: Date.now() });
+    h = h.slice(0, MAX_HISTORY);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+    renderHistory();
+  }
+  function renderHistory() {
+    const h = getHistory();
+    const el = $('history');
+    if (!h.length) { el.innerHTML = '<div class="history-empty" style="grid-column: 1 / -1;">NOTHING PULLED YET</div>'; return; }
+    el.innerHTML = h.map(item => `
+      <a class="history-card" href="?fw=${item.id}">
+        <div class="history-id">FW-${String(item.id).padStart(3, '0')}</div>
+        <div class="history-text">"${escapeHtml(item.text)}"</div>
+      </a>`).join('');
+  }
+  function clearHistory() { localStorage.removeItem(HISTORY_KEY); renderHistory(); showToast('History cleared'); }
+
+  // ---------- Share ----------
+  function currentShareUrl() {
+    if (currentFortuneIdx === null) return location.origin + location.pathname;
+    return location.origin + location.pathname + '?fw=' + (currentFortuneIdx + 1);
+  }
+  function currentShareText() {
+    if (currentFortuneIdx === null) return 'Dig the Crate · JZZO';
+    return '"' + FORTUNES[currentFortuneIdx] + '" — JZZO Fortune Wax FW-' + String(currentFortuneIdx + 1).padStart(3, '0');
+  }
+  async function shareCurrent() {
+    if (navigator.share) { try { await navigator.share({ title: 'Dig the Crate · JZZO', text: currentShareText(), url: currentShareUrl() }); } catch {} }
+    else { copyLink(); }
+  }
+  async function copyLink() {
+    try { await navigator.clipboard.writeText(currentShareUrl()); showToast('Link copied'); }
+    catch { showToast('Could not copy'); }
+  }
+  // ---------- Toast ----------
+  let toastTimer;
+  function showToast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+  // ---------- Wire-up ----------
+  counter.textContent = 'FW SERIES · ' + FORTUNES.length + ' FORTUNES IN ROTATION';
+  renderHistory();
+
+  crateWrap.addEventListener('click', () => {
+    if (!record.classList.contains('digging') && !record.classList.contains('resetting')) dig();
+  });
+  digBtn.addEventListener('click', dig);
+  shareBtn.addEventListener('click', shareCurrent);
+  $('clearHistoryBtn').addEventListener('click', clearHistory);
+
+  document.querySelector('.nav-toggle')?.addEventListener('click', () => {
+    const links = document.querySelector('.nav-links');
+    if (links.style.display === 'flex') { links.style.display = ''; return; }
+    Object.assign(links.style, { display: 'flex', position: 'absolute', top: '60px', right: '24px', flexDirection: 'column', background: 'var(--bg)', padding: '16px', border: '1px solid var(--line)', borderRadius: 'var(--radius)' });
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      const tag = document.activeElement.tagName;
+      if (tag !== 'BUTTON' && tag !== 'INPUT') {
+        e.preventDefault();
+        if (!busy) dig();
+      }
+    }
+  });
+
+  // ---------- Deep link on load ----------
+  const params = new URLSearchParams(location.search);
+  const deepLink = parseInt(params.get('fw'), 10);
+  if (!isNaN(deepLink) && deepLink >= 1 && deepLink <= FORTUNES.length) {
+    showFortuneFromLink(deepLink - 1);
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jzzo.sdfkjh.com/sitemap.xml

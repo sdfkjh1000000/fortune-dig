@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 · JZZO</title>
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon-256.png" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0a; --fg: #ffffff;
+    --fg-dim: rgba(255,255,255,0.7); --fg-mute: rgba(255,255,255,0.5); --fg-faint: rgba(255,255,255,0.4);
+    --line-strong: rgba(255,255,255,0.2);
+    --accent: #ff5a3c; --radius: 8px;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+    --sans: 'Inter', -apple-system, system-ui, sans-serif;
+  }
+  html, body { background: var(--bg); color: var(--fg); font-family: var(--sans); -webkit-font-smoothing: antialiased; min-height: 100vh; }
+  body { display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; }
+  .tag { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.25em; margin-bottom: 20px; }
+  h1 { font-size: clamp(64px, 12vw, 120px); font-weight: 600; letter-spacing: -0.04em; line-height: 1; margin-bottom: 16px; color: var(--accent); }
+  p { color: var(--fg-dim); font-size: 16px; max-width: 380px; margin: 0 auto 28px; line-height: 1.6; }
+  .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: var(--radius); font-size: 14px; font-weight: 500; border: 1px solid var(--line-strong); color: var(--fg); text-decoration: none; transition: background 0.15s ease; }
+  .btn:hover { background: rgba(255,255,255,0.05); }
+  .btn-primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .btn-primary:hover { background: #ff7059; }
+  .footer-loc { font-family: var(--mono); font-size: 10px; color: var(--fg-faint); letter-spacing: 0.2em; margin-top: 60px; }
+</style>
+</head>
+<body>
+  <div>
+    <div class="tag">RECORD NOT FOUND IN CRATE</div>
+    <h1>404</h1>
+    <p>This wax isn't in the bin. Maybe it never pressed. Maybe someone else dug it first.</p>
+    <div class="actions">
+      <a href="/" class="btn btn-primary">▼ Back to home</a>
+      <a href="/fortune/" class="btn">Dig the crate</a>
+    </div>
+    <div class="footer-loc">34°N · 118°W</div>
+  </div>
+</body>
+</html>
