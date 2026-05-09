@@ -599,17 +599,21 @@ const FORTUNES = [
   "The rarest pressings were never hyped. They were just honest."
 ];
 
-const VIDEOS = [
-  "6bUREOM--is","tPAB4V29D0U","oqX-RBeJdf8","zzygN6SElRM","_Znt0XIzGHk",
-  "6oMeJ9Vvfno","r-1h9aXKMnw","FooJrGE5nz0","soQOReY7plU","Yhg9xX8Wm5c",
-  "Sy05K26R6eQ","k0I4NIZzLow","cnABlfMe4Os","02o5TNO4gms","fkw51ipsFnA",
-  "xHOFJYmJAgo","vrKX_-244LM","z-0FM5LTF5c","yKWciE9pjts","-x9LTivubzA",
-  "ExDBRh5Q7b4","vVKFHrMpaTw","WBNIVLvOVcc","rGv0gX2XLiM","OMRhFt9WPPU",
-  "ylXGhZEwLBg","yipN8ocwZyI","0W0En-PdnvY","PP34hRRmtUw","zL27BEuglNw"
+// Sourced from Joe's channel playlists (@jzzo-dyt):
+//   Aesop Rock — PLidAiSwJGBAhgP1iSGWVqHJ__JJMU18Dz
+//   MF DOOM    — PLidAiSwJGBAhB-9BbB4HZv7q9B66vpMh_
+const AESOP_VIDEOS = [
+  "rQK1EZQ5-cA","twYGJ4Biy7Y","svmw3np9JEE","pR5GS6j1IfI","k05VlnI1a8g",
+  "7YpBTS6UOFg","z43DWCjgR8U","OaH4KGQSBso","5tr58_cgmjc","EQHgi-H7Iz0",
+  "amC-FLQaHqk","KQPK1E5hg5I","48-Qjhfde7M","5X2mrf15rl0","LnJ51mDYHBU",
+  "Svxd49HhhiA","fCA0tdMDlRE","1N6Kw24TGds"
+];
+const DOOM_VIDEOS = [
+  "eGboqzDjio4","NKTbpt8k56w","Te1PAswX-ZQ","gwX9Kchtmyg",
+  "99ASysmzBYU","6kWV0SuKC0k","UoB9PRTwlzA"
 ];
 
 let pool = [];
-let videoPool = [];
 let digCount = 0;
 const record = document.getElementById('record');
 const vinyl = document.querySelector('.vinyl');
@@ -773,9 +777,19 @@ function shuffle(arr) {
 }
 
 function refillPool() { pool = shuffle([...Array(FORTUNES.length).keys()]); }
-function refillVideoPool() { videoPool = shuffle([...Array(VIDEOS.length).keys()]); }
+let aesopPool = [], doomPool = [];
+function refillAesop() { aesopPool = shuffle([...Array(AESOP_VIDEOS.length).keys()]); }
+function refillDoom()  { doomPool  = shuffle([...Array(DOOM_VIDEOS.length).keys()]); }
 function pickFortune() { if (!pool.length) refillPool(); return pool.pop(); }
-function pickVideo() { if (!videoPool.length) refillVideoPool(); return VIDEOS[videoPool.pop()]; }
+function pickVideo() {
+  // 50/50 coin flip between Aesop Rock and MF DOOM pools
+  if (Math.random() < 0.5) {
+    if (!aesopPool.length) refillAesop();
+    return AESOP_VIDEOS[aesopPool.pop()];
+  }
+  if (!doomPool.length) refillDoom();
+  return DOOM_VIDEOS[doomPool.pop()];
+}
 
 let typewriterTimer = null;
 function typewrite(el, text, speed, onDone) {
@@ -881,7 +895,8 @@ crateWrap.addEventListener('click', function() {
 });
 digBtn.addEventListener('click', dig);
 refillPool();
-refillVideoPool();
+refillAesop();
+refillDoom();
 </script>
 </body>
 </html>
