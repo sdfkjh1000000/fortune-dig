@@ -4,8 +4,8 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const crateB64 = readFileSync(resolve(here, 'crate.png')).toString('base64');
-const crateHref = `data:image/png;base64,${crateB64}`;
+const cookieB64 = readFileSync(resolve(here, 'cookie-clean.png')).toString('base64');
+const cookieHref = `data:image/png;base64,${cookieB64}`;
 
 const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1200 630" width="1200" height="630">
@@ -45,13 +45,20 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
       </feMerge>
     </filter>
 
-    <!-- crate drop shadow -->
-    <filter id="crate-shadow" x="-15%" y="-10%" width="130%" height="135%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="14"/>
-      <feOffset dx="0" dy="20" result="off"/>
-      <feComponentTransfer><feFuncA type="linear" slope=".7"/></feComponentTransfer>
+    <!-- cookie drop shadow + warm ember bloom -->
+    <filter id="cookie-shadow" x="-25%" y="-15%" width="150%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="18"/>
+      <feOffset dx="0" dy="22" result="off"/>
+      <feComponentTransfer><feFuncA type="linear" slope=".75"/></feComponentTransfer>
       <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
+
+    <!-- ember radial glow overlay (warm light spilling from cigar tip) -->
+    <radialGradient id="ember-spill" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"  stop-color="#ffb060" stop-opacity=".55"/>
+      <stop offset="40%" stop-color="#d23a08" stop-opacity=".22"/>
+      <stop offset="100%" stop-color="#d23a08" stop-opacity="0"/>
+    </radialGradient>
 
     <!-- title underline -->
     <linearGradient id="rule" x1="0" y1="0" x2="1" y2="0">
@@ -111,12 +118,16 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
     <circle cx="1080" cy="390" r="2.5" fill="#d4713a" opacity=".55"/>
   </g>
 
-  <!-- CRATE: shadow puddle + image, slight rotation -->
-  <g transform="translate(290 420)">
-    <ellipse cx="0" cy="120" rx="240" ry="18" fill="url(#puddle)"/>
+  <!-- COOKIE + CIGAR: shadow puddle, ember spill, image -->
+  <g transform="translate(310 510)">
+    <ellipse cx="0" cy="0" rx="220" ry="14" fill="url(#puddle)"/>
   </g>
-  <g transform="translate(60 100) rotate(-2 260 220)" filter="url(#crate-shadow)">
-    <image href="${crateHref}" x="0" y="0" width="520" height="442" preserveAspectRatio="xMidYMid meet"/>
+  <!-- Ember light spill on the surrounding scene (positioned at cigar tip) -->
+  <g transform="translate(540 340)">
+    <ellipse cx="0" cy="0" rx="260" ry="180" fill="url(#ember-spill)"/>
+  </g>
+  <g transform="translate(80 70)" filter="url(#cookie-shadow)">
+    <image href="${cookieHref}" x="0" y="0" width="500" height="460" preserveAspectRatio="xMidYMid meet"/>
   </g>
 
   <!-- RIGHT COLUMN -->
