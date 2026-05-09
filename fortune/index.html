@@ -364,7 +364,7 @@
     "Your favorite producer was once where you are now. Right now.",
     "Cut the intro in half.",
     "A good drum break is a small inheritance. Spend it.",
-    "Whatever you're avoiding mixing — that's the song."
+    "Whatever you're avoiding mixing, that's the song."
   ];
 
   // Sourced from Joe's channel playlists (@jzzo-dyt)
@@ -662,7 +662,7 @@
   }
   function currentShareText() {
     if (currentFortuneIdx === null) return 'Dig the Crate · JZZO';
-    return '"' + FORTUNES[currentFortuneIdx] + '" — JZZO Fortune Wax FW-' + String(currentFortuneIdx + 1).padStart(3, '0');
+    return '"' + FORTUNES[currentFortuneIdx] + '" · JZZO Fortune Wax FW-' + String(currentFortuneIdx + 1).padStart(3, '0');
   }
   async function shareCurrent() {
     if (navigator.share) { try { await navigator.share({ title: 'Dig the Crate · JZZO', text: currentShareText(), url: currentShareUrl() }); } catch {} }
