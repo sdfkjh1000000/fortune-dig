@@ -76,7 +76,7 @@
   #dig { padding: 80px 0; transition: padding var(--fade); }
 
   /* idle state: crate + copy + scratch-tease vinyl */
-  .dig-idle { display: grid; grid-template-columns: 220px 1fr 160px; gap: 40px; align-items: center; transition: opacity var(--fade); }
+  .dig-idle { display: grid; grid-template-columns: 160px 1fr 220px; gap: 40px; align-items: center; transition: opacity var(--fade); }
   .dig-art { width: 220px; height: 220px; display: flex; align-items: center; justify-content: center; }
   .dig-art img { max-width: 100%; height: auto; filter: drop-shadow(0 18px 32px rgba(0,0,0,0.6)); }
   .dig-tag { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.2em; margin-bottom: 10px; }
@@ -241,15 +241,6 @@
 
     <!-- IDLE: pre-dig -->
     <div class="dig-idle" id="digIdle">
-      <div class="dig-art">
-        <img src="/crate.png" alt="A wooden crate full of vinyl records" width="220" height="220">
-      </div>
-      <div>
-        <div class="dig-tag">FW SERIES</div>
-        <h3>Dig the Crate</h3>
-        <p>A random mashup from Joe's crate. Pull a record, hit play, scratch the wax.</p>
-        <button class="btn-dig" id="digBtn" type="button">▼ Dig in the crate</button>
-      </div>
       <div class="dig-tease">
         <div class="tease-wrap">
         <div class="vinyl" id="vinylIdle">
@@ -292,6 +283,15 @@
           <div class="label-line">Just scratch</div>
           <div class="sub-line">↺ drag the record</div>
         </div>
+      </div>
+      <div>
+        <div class="dig-tag">FW SERIES</div>
+        <h3>Dig the Crate</h3>
+        <p>A random mashup from Joe's crate. Pull a record, hit play, scratch the wax.</p>
+        <button class="btn-dig" id="digBtn" type="button">▼ Dig in the crate</button>
+      </div>
+      <div class="dig-art">
+        <img src="/crate.png" alt="A wooden crate full of vinyl records" width="220" height="220">
       </div>
     </div>
 
