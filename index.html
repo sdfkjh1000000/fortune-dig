@@ -157,15 +157,20 @@
   .video-meta { color: var(--fg-faint); font-family: var(--mono); font-size: 11px; margin-top: 4px; }
   .videos-loading { grid-column: 1 / -1; text-align: center; color: var(--fg-mute); font-family: var(--mono); font-size: 12px; padding: 40px 0; }
 
-  /* ---------- STORE / ABOUT ---------- */
-  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
-  .split > div { padding: 56px 32px; }
-  .split > div:first-child { border-right: 1px solid var(--line); padding-left: 0; }
-  .split > div:last-child { padding-right: 0; }
-  .split-tag { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.2em; margin-bottom: 12px; }
-  .split h3 { font-size: 18px; font-weight: 500; margin-bottom: 10px; }
-  .split p { color: var(--fg-dim); font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
-  .email-form { display: flex; gap: 8px; }
+  /* ---------- ABOUT (now its own section, above videos) ---------- */
+  #about { text-align: center; }
+  #about .about-inner { max-width: 640px; margin: 0 auto; }
+  #about .split-tag { display: block; }
+
+  /* ---------- STORE (now standalone, below videos) ---------- */
+  #store { text-align: center; }
+  #store .store-inner { max-width: 520px; margin: 0 auto; }
+
+  /* shared eyebrow + section copy treatment */
+  .split-tag { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.2em; margin-bottom: 14px; }
+  #about h3, #store h3 { font-size: 26px; font-weight: 600; letter-spacing: -0.015em; margin-bottom: 14px; line-height: 1.15; }
+  #about p, #store p { color: var(--fg-dim); font-size: 15px; line-height: 1.65; margin-bottom: 22px; }
+  .email-form { display: flex; gap: 8px; max-width: 420px; margin: 0 auto; }
   .email-form input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--line-strong); border-radius: var(--radius); padding: 10px 14px; color: var(--fg); font-family: inherit; font-size: 13px; outline: none; transition: border-color 0.15s ease; }
   .email-form input:focus { border-color: rgba(255,255,255,0.5); }
   .email-form input::placeholder { color: var(--fg-faint); }
@@ -198,9 +203,7 @@
     .dig-deck .deck-title { white-space: normal; }
     .dig-deck .btn-again { width: 100%; justify-content: center; }
     .videos { grid-template-columns: 1fr; gap: 24px; }
-    .split { grid-template-columns: 1fr; }
-    .split > div { padding: 40px 0; border-right: none !important; border-bottom: 1px solid var(--line); }
-    .split > div:last-child { border-bottom: none; }
+    #about, #store { padding: 48px 0; }
   }
 </style>
 </head>
@@ -342,6 +345,20 @@
   </div>
 </section>
 
+<section id="about">
+  <div class="wrap">
+    <div class="about-inner">
+      <div class="split-tag">ABOUT</div>
+      <h3>Who's JZZO?</h3>
+      <p>Jzzo: Just Zig Zagging Obstacles. Mashups built from underground hip-hop, soul, and whatever else lands in the crate. Posted from LA since October 2022. Still digging.</p>
+      <a class="btn-yt-ghost" href="https://www.youtube.com/@jzzo-dyt?sub_confirmation=1" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        Subscribe on YouTube
+      </a>
+    </div>
+  </div>
+</section>
+
 <section id="videos">
   <div class="wrap">
     <div class="section-head">
@@ -354,28 +371,17 @@
   </div>
 </section>
 
-<section id="store-about" style="padding: 0;">
+<section id="store">
   <div class="wrap">
-    <div class="split">
-      <div id="store">
-        <div class="split-tag">STORE</div>
-        <h3>Merch coming soon</h3>
-        <p>Tees, slipmats, and limited beat tapes. Drop your email and you'll know first. No spam, just the drop.</p>
-        <form class="email-form" onsubmit="handleSignup(event)">
-          <input type="email" placeholder="your@email.com" required aria-label="Email address">
-          <button type="submit">Notify me</button>
-        </form>
-        <div class="form-note" id="form-note"></div>
-      </div>
-      <div id="about">
-        <div class="split-tag">ABOUT</div>
-        <h3>Who's JZZO?</h3>
-        <p>Jzzo: Just Zig Zagging Obstacles. Mashups built from underground hip-hop, soul, and whatever else lands in the crate. Posted from LA since October 2022. Still digging.</p>
-        <a class="btn-yt-ghost" href="https://www.youtube.com/@jzzo-dyt?sub_confirmation=1" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-          Subscribe on YouTube
-        </a>
-      </div>
+    <div class="store-inner">
+      <div class="split-tag">STORE</div>
+      <h3>Merch coming soon</h3>
+      <p>Tees, slipmats, and limited beat tapes. Drop your email and you'll know first. No spam, just the drop.</p>
+      <form class="email-form" onsubmit="handleSignup(event)">
+        <input type="email" placeholder="your@email.com" required aria-label="Email address">
+        <button type="submit">Notify me</button>
+      </form>
+      <div class="form-note" id="form-note"></div>
     </div>
   </div>
 </section>
