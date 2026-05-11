@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JZZO · Just Zig Zagging Obstacles</title>
-<meta name="description" content="JZZO. Just Zig Zagging Obstacles. All mashups, made in LA. Subscribe on YouTube.">
+<meta name="description" content="JZZO. Just Zig Zagging Obstacles. All mashups, made in LA. Dig the crate.">
 <meta property="og:title" content="JZZO · Just Zig Zagging Obstacles">
 <meta property="og:description" content="Just Zig Zagging Obstacles. All mashups, made in LA.">
 <meta property="og:image" content="/og.png">
@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -30,17 +30,20 @@
     --fg-dim: rgba(255,255,255,0.7); --fg-mute: rgba(255,255,255,0.5); --fg-faint: rgba(255,255,255,0.4);
     --line: rgba(255,255,255,0.1); --line-strong: rgba(255,255,255,0.2);
     --yt-red: #ff0000; --accent: #ff5a3c;
+    --label-bg: #c4a96a;
     --radius: 8px; --radius-lg: 12px; --max: 1100px;
     --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     --sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --fade: 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  html, body { background: var(--bg); color: var(--fg); font-family: var(--sans); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  html, body { background: var(--bg); color: var(--fg); font-family: var(--sans); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; overscroll-behavior-y: none; }
   body { min-height: 100vh; line-height: 1.5; }
   a { color: inherit; text-decoration: none; }
   a:hover { opacity: 0.85; }
   .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 
-  .nav { position: sticky; top: 0; z-index: 50; background: rgba(10,10,10,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  /* ---------- NAV (fades out during playback) ---------- */
+  .nav { position: sticky; top: 0; z-index: 50; background: rgba(10,10,10,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); transition: opacity var(--fade); }
   .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; }
   .logo { display: flex; align-items: baseline; gap: 8px; font-weight: 600; letter-spacing: 0.05em; font-size: 15px; }
   .logo-tag { font-family: var(--mono); font-size: 11px; color: var(--fg-faint); font-weight: 400; }
@@ -48,7 +51,8 @@
   .nav-links a:hover { color: var(--fg); opacity: 1; }
   .nav-toggle { display: none; background: none; border: none; color: var(--fg); cursor: pointer; font-size: 22px; }
 
-  .hero { text-align: center; padding: 96px 0 80px; border-bottom: 1px solid var(--line); position: relative; overflow: hidden; }
+  /* ---------- HERO (fades out during playback) ---------- */
+  .hero { text-align: center; padding: 96px 0 80px; border-bottom: 1px solid var(--line); position: relative; overflow: hidden; transition: opacity var(--fade); }
   .hero-tagline { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.25em; margin-bottom: 24px; }
   .hero h1 { font-size: clamp(56px, 9vw, 96px); font-weight: 600; letter-spacing: -0.03em; line-height: 1; margin-bottom: 20px; }
   .hero-sub { color: var(--fg-dim); font-size: 17px; max-width: 480px; margin: 0 auto 36px; line-height: 1.6; }
@@ -57,12 +61,83 @@
   .btn-yt svg { width: 20px; height: 20px; }
   .hero-meta { color: var(--fg-faint); font-family: var(--mono); font-size: 11px; margin-top: 18px; letter-spacing: 0.05em; }
 
+  /* ---------- THEATER (hidden until playback) ---------- */
+  .theater { display: none; width: 100%; background: #000; border-bottom: 1px solid var(--line); opacity: 0; transition: opacity var(--fade); }
+  .theater-frame { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; }
+  .theater-frame iframe, .theater-frame > div { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+
+  /* ---------- DIG SECTION (slot 2, two states) ---------- */
   section { padding: 64px 0; border-bottom: 1px solid var(--line); }
   .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 28px; }
   .section-head h2 { font-size: 22px; font-weight: 500; }
   .section-head a { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.2em; }
   .section-head a:hover { color: var(--fg); }
 
+  #dig { padding: 80px 0; transition: padding var(--fade); }
+
+  /* idle state: crate + copy + button */
+  .dig-idle { display: grid; grid-template-columns: 240px 1fr; gap: 40px; align-items: center; transition: opacity var(--fade); }
+  .dig-art { width: 240px; height: 240px; display: flex; align-items: center; justify-content: center; }
+  .dig-art img { max-width: 100%; height: auto; filter: drop-shadow(0 18px 32px rgba(0,0,0,0.6)); }
+  .dig-tag { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.2em; margin-bottom: 10px; }
+  .dig-idle h3 { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 12px; line-height: 1.05; }
+  .dig-idle p { color: var(--fg-dim); font-size: 15px; margin-bottom: 24px; max-width: 460px; }
+  .btn-dig { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--line-strong); color: var(--fg); padding: 13px 22px; border-radius: var(--radius); font-size: 14px; font-family: inherit; cursor: pointer; background: transparent; transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
+  .btn-dig:hover { background: rgba(255,255,255,0.05); border-color: var(--accent); color: var(--accent); opacity: 1; }
+
+  /* deck state: spinning vinyl + track info + dig-again */
+  .dig-deck { display: none; align-items: center; gap: 28px; opacity: 0; transition: opacity var(--fade); }
+  .dig-deck .deck-vinyl { width: 96px; height: 96px; flex: 0 0 96px; position: relative; }
+  .dig-deck .deck-info { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .dig-deck .deck-eyebrow { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 8px; }
+  .dig-deck .deck-eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 rgba(255,90,60,0.6); animation: pulse 1.6s infinite; }
+  .dig-deck .deck-title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.3; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dig-deck .deck-hint { font-family: var(--mono); font-size: 10px; color: var(--fg-faint); letter-spacing: 0.12em; text-transform: uppercase; }
+  .dig-deck .btn-again { display: inline-flex; align-items: center; gap: 10px; padding: 11px 18px; border: 1px solid var(--line-strong); background: transparent; color: var(--fg); font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; border-radius: var(--radius); transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
+  .dig-deck .btn-again:hover { background: rgba(255,255,255,0.05); border-color: var(--accent); color: var(--accent); opacity: 1; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 8px transparent; } }
+
+  /* vinyl (spinning, scratchable) — same record from /fortune/, sized for the deck */
+  .vinyl {
+    width: 100%; height: 100%; border-radius: 50%; position: relative; touch-action: none; cursor: grab;
+    background: radial-gradient(circle, transparent 18%,
+      #111 19%, #0d0d0d 20%, #1a1a1a 21%, #111 22%,
+      #1a1a1a 24%, #111 25%, #1a1a1a 27%, #111 28%,
+      #1a1a1a 30%, #0f0f0f 31%, #1a1a1a 33%, #111 34%,
+      #1a1a1a 36%, #111 37%, #1a1a1a 39%, #0d0d0d 40%,
+      #1a1a1a 42%, #111 43%, #1a1a1a 45%, #111 46%,
+      #1a1a1a 48%, #111 49%, #1a1a1a 50%);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.5), inset 0 0 60px rgba(0,0,0,0.3);
+  }
+  .vinyl.scratching { cursor: grabbing; }
+  .vinyl::after { content: ''; position: absolute; top: 50%; left: 50%; width: 6%; height: 6%; border-radius: 50%; background: #222; border: 1px solid #333; transform: translate(-50%, -50%); }
+  .label {
+    position: absolute; top: 50%; left: 50%; width: 56%; height: 56%; border-radius: 50%;
+    transform: translate(-50%, -50%); background: var(--label-bg);
+    display: flex; align-items: center; justify-content: center;
+    padding: 8% 10%; text-align: center; overflow: hidden;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.2); z-index: 1; pointer-events: none;
+  }
+  .label::before {
+    content: ''; position: absolute; inset: 0; border-radius: 50%;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+    opacity: 0.5; pointer-events: none;
+  }
+  .label-svg { width: 90%; height: auto; display: block; pointer-events: none; }
+
+  /* ---------- BODY.PLAYING STATE ---------- */
+  body.playing .nav { opacity: 0; pointer-events: none; }
+  body.playing .hero { opacity: 0; pointer-events: none; }
+  body.playing.collapsed .nav { display: none; }
+  body.playing.collapsed .hero { display: none; }
+  body.playing.collapsed .theater { display: block; }
+  body.playing .theater.in { opacity: 1; }
+  body.playing #dig { padding: 28px 0; }
+  body.playing .dig-idle { display: none; }
+  body.playing .dig-deck { display: flex; }
+  body.playing .dig-deck.in { opacity: 1; }
+
+  /* ---------- VIDEOS GRID ---------- */
   .videos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   .video-card { display: block; }
   .thumb { aspect-ratio: 16/9; background: var(--bg-elev); border-radius: var(--radius); position: relative; overflow: hidden; background-size: cover; background-position: center; transition: transform 0.2s ease; }
@@ -75,15 +150,7 @@
   .video-meta { color: var(--fg-faint); font-family: var(--mono); font-size: 11px; margin-top: 4px; }
   .videos-loading { grid-column: 1 / -1; text-align: center; color: var(--fg-mute); font-family: var(--mono); font-size: 12px; padding: 40px 0; }
 
-  .fortune { display: grid; grid-template-columns: 200px 1fr; gap: 32px; align-items: center; }
-  .fortune-art { width: 200px; height: 200px; display: flex; align-items: center; justify-content: center; }
-  .fortune-art img { max-width: 100%; height: auto; }
-  .fortune-tag { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.2em; margin-bottom: 8px; }
-  .fortune h3 { font-size: 24px; font-weight: 500; margin-bottom: 10px; }
-  .fortune p { color: var(--fg-dim); font-size: 15px; margin-bottom: 20px; max-width: 460px; }
-  .btn-ghost { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line-strong); color: var(--fg); padding: 10px 18px; border-radius: var(--radius); font-size: 14px; transition: background 0.15s ease, border-color 0.15s ease; }
-  .btn-ghost:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.4); opacity: 1; }
-
+  /* ---------- STORE / ABOUT ---------- */
   .split { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
   .split > div { padding: 56px 32px; }
   .split > div:first-child { border-right: 1px solid var(--line); padding-left: 0; }
@@ -99,6 +166,7 @@
   .email-form button:hover { opacity: 0.85; }
   .form-note { font-family: var(--mono); font-size: 10px; color: var(--fg-faint); margin-top: 10px; letter-spacing: 0.05em; }
 
+  /* ---------- FOOTER ---------- */
   footer { padding: 32px 0; }
   .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
   .footer-loc { font-family: var(--mono); font-size: 10px; color: var(--fg-faint); letter-spacing: 0.2em; }
@@ -111,10 +179,16 @@
     .nav-links { display: none; }
     .nav-toggle { display: block; }
     .hero { padding: 64px 0 56px; }
+    #dig { padding: 56px 0; }
+    .dig-idle { grid-template-columns: 1fr; gap: 20px; text-align: center; }
+    .dig-art { margin: 0 auto; width: 180px; height: 180px; }
+    .dig-idle p { margin-left: auto; margin-right: auto; }
+    .dig-deck { flex-wrap: wrap; gap: 16px; justify-content: center; text-align: center; }
+    .dig-deck .deck-vinyl { width: 72px; height: 72px; flex: 0 0 72px; }
+    .dig-deck .deck-info { flex: 1 1 auto; min-width: 60%; align-items: center; }
+    .dig-deck .deck-title { white-space: normal; }
+    .dig-deck .btn-again { width: 100%; justify-content: center; }
     .videos { grid-template-columns: 1fr; gap: 24px; }
-    .fortune { grid-template-columns: 1fr; gap: 20px; text-align: center; }
-    .fortune-art { margin: 0 auto; }
-    .fortune p { margin-left: auto; margin-right: auto; }
     .split { grid-template-columns: 1fr; }
     .split > div { padding: 40px 0; border-right: none !important; border-bottom: 1px solid var(--line); }
     .split > div:last-child { border-bottom: none; }
@@ -128,7 +202,6 @@
     <a href="/" class="logo">JZZO <span class="logo-tag">· LA</span></a>
     <div class="nav-links">
       <a href="#videos">Videos</a>
-      <a href="/fortune/">Fortune Dig</a>
       <a href="#store">Store</a>
       <a href="#about">About</a>
     </div>
@@ -149,6 +222,78 @@
   </div>
 </header>
 
+<!-- THEATER — only visible during playback -->
+<section class="theater" id="theater" aria-hidden="true">
+  <div class="theater-frame" id="theaterFrame"></div>
+</section>
+
+<!-- DIG (slot 2) — two states: idle and deck -->
+<section id="dig">
+  <div class="wrap">
+
+    <!-- IDLE: pre-dig -->
+    <div class="dig-idle" id="digIdle">
+      <div class="dig-art">
+        <img src="/crate.png" alt="A wooden crate full of vinyl records" width="240" height="240">
+      </div>
+      <div>
+        <div class="dig-tag">FW SERIES</div>
+        <h3>Dig the Crate</h3>
+        <p>A random mashup from Joe's crate. Pull a record, hit play, scratch the wax.</p>
+        <button class="btn-dig" id="digBtn" type="button">▼ Dig in the crate</button>
+      </div>
+    </div>
+
+    <!-- DECK: post-dig (visible while video plays) -->
+    <div class="dig-deck" id="digDeck">
+      <div class="deck-vinyl">
+        <div class="vinyl" id="vinyl">
+          <div class="label">
+            <svg class="label-svg" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <path id="arc-top" d="M 20,70 Q 100,5 180,70" fill="none"/>
+                <path id="arc-bot" d="M 30,78 Q 100,120 170,78" fill="none"/>
+                <linearGradient id="lens-l" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#6b4c2a" stop-opacity=".6"/>
+                  <stop offset="50%" stop-color="#d4713a" stop-opacity=".4"/>
+                  <stop offset="100%" stop-color="#4a2d6b" stop-opacity=".5"/>
+                </linearGradient>
+                <linearGradient id="lens-r" x1="1" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#4a2d6b" stop-opacity=".5"/>
+                  <stop offset="50%" stop-color="#d4713a" stop-opacity=".4"/>
+                  <stop offset="100%" stop-color="#6b4c2a" stop-opacity=".6"/>
+                </linearGradient>
+              </defs>
+              <text font-family="'Courier New',monospace" font-size="11" font-weight="bold" fill="#5a3e1a" letter-spacing="3">
+                <textPath href="#arc-top" startOffset="50%" text-anchor="middle">FORTUNE WAX</textPath>
+              </text>
+              <g transform="translate(100,52)">
+                <path d="M -8,0 Q 0,-6 8,0" stroke="#3a2510" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <rect x="-48" y="-10" width="38" height="22" rx="4" fill="url(#lens-l)" stroke="#3a2510" stroke-width="2"/>
+                <rect x="10" y="-10" width="38" height="22" rx="4" fill="url(#lens-r)" stroke="#3a2510" stroke-width="2"/>
+                <line x1="-48" y1="-4" x2="-58" y2="-8" stroke="#3a2510" stroke-width="2" stroke-linecap="round"/>
+                <line x1="48" y1="-4" x2="58" y2="-8" stroke="#3a2510" stroke-width="2" stroke-linecap="round"/>
+                <text x="-29" y="5" font-family="'Courier New',monospace" font-size="12" font-weight="bold" fill="#2a1c0f" text-anchor="middle" opacity=".85">JZ</text>
+                <text x="29" y="5" font-family="'Courier New',monospace" font-size="12" font-weight="bold" fill="#2a1c0f" text-anchor="middle" opacity=".85">ZO</text>
+              </g>
+              <text font-family="'Courier New',monospace" font-size="9" fill="#5a3e1a" letter-spacing="2" opacity=".5">
+                <textPath href="#arc-bot" startOffset="50%" text-anchor="middle">JUST ZIG ZAGGING</textPath>
+              </text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="deck-info">
+        <div class="deck-eyebrow">Now playing</div>
+        <div class="deck-title" id="deckTitle">JZZO mashup</div>
+        <div class="deck-hint">Drag the record to scratch · 33⅓ RPM</div>
+      </div>
+      <button class="btn-again" id="digAgainBtn" type="button">▼ Dig again</button>
+    </div>
+
+  </div>
+</section>
+
 <section id="videos">
   <div class="wrap">
     <div class="section-head">
@@ -157,22 +302,6 @@
     </div>
     <div class="videos" id="video-grid">
       <div class="videos-loading">Loading latest videos…</div>
-    </div>
-  </div>
-</section>
-
-<section id="fortune">
-  <div class="wrap">
-    <div class="fortune">
-      <div class="fortune-art">
-        <img src="/crate.png" alt="A wooden crate with three vinyl records sticking out" width="200" height="200">
-      </div>
-      <div>
-        <div class="fortune-tag">FW SERIES</div>
-        <h3>Dig the Crate</h3>
-        <p>Pull a record from the crate. Read your fortune. The original toy that started this site, still here.</p>
-        <a class="btn-ghost" href="/fortune/">▼ Dig in the crate</a>
-      </div>
     </div>
   </div>
 </section>
@@ -212,13 +341,253 @@
 </footer>
 
 <script>
-  // ---------- YouTube videos via RSS ----------
-  // Replace with your real channel ID. Find it at https://www.youtube.com/account_advanced
+  // ============================================================
+  //  JZZO homepage — theater takeover + scratch deck
+  // ============================================================
+
+  // ---------- Curated video pools (Joe's playlists) ----------
+  const AESOP_VIDEOS = [
+    "rQK1EZQ5-cA","twYGJ4Biy7Y","svmw3np9JEE","pR5GS6j1IfI","k05VlnI1a8g",
+    "7YpBTS6UOFg","z43DWCjgR8U","OaH4KGQSBso","5tr58_cgmjc","EQHgi-H7Iz0",
+    "amC-FLQaHqk","KQPK1E5hg5I","48-Qjhfde7M","5X2mrf15rl0","LnJ51mDYHBU",
+    "Svxd49HhhiA","fCA0tdMDlRE","1N6Kw24TGds"
+  ];
+  const DOOM_VIDEOS = [
+    "eGboqzDjio4","NKTbpt8k56w","Te1PAswX-ZQ","gwX9Kchtmyg",
+    "99ASysmzBYU","6kWV0SuKC0k","UoB9PRTwlzA"
+  ];
+
+  function shuffle(a) { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  let aesopPool = [], doomPool = [];
+  function refillAesop() { aesopPool = shuffle([...Array(AESOP_VIDEOS.length).keys()]); }
+  function refillDoom()  { doomPool  = shuffle([...Array(DOOM_VIDEOS.length).keys()]); }
+  function pickVideo() {
+    if (Math.random() < 0.5) {
+      if (!aesopPool.length) refillAesop();
+      return AESOP_VIDEOS[aesopPool.pop()];
+    }
+    if (!doomPool.length) refillDoom();
+    return DOOM_VIDEOS[doomPool.pop()];
+  }
+  refillAesop(); refillDoom();
+
+  // ---------- DOM ----------
+  const $ = id => document.getElementById(id);
+  const body         = document.body;
+  const theater      = $('theater');
+  const theaterFrame = $('theaterFrame');
+  const digIdle      = $('digIdle');
+  const digDeck      = $('digDeck');
+  const digBtn       = $('digBtn');
+  const digAgainBtn  = $('digAgainBtn');
+  const vinyl        = $('vinyl');
+  const deckTitle    = $('deckTitle');
+
+  let playing = false;
+  let busy = false;
+
+  // ---------- YouTube IFrame API ----------
+  let ytReady = false;
+  let ytPlayer = null;
+  const ytTag = document.createElement('script');
+  ytTag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(ytTag);
+  window.onYouTubeIframeAPIReady = function () { ytReady = true; };
+
+  // ---------- Vinyl spin (33⅓ rpm while playing, paused while scratching) ----------
+  let angle = 0, spinning = false, scratching = false, lastTime = 0;
+  const RPM = 33.33;
+  const DEG_PER_MS = (RPM * 360) / 60000;
+  function spinLoop(ts) {
+    if (!lastTime) lastTime = ts;
+    const dt = ts - lastTime; lastTime = ts;
+    if (spinning && !scratching) angle = (angle + DEG_PER_MS * dt) % 360;
+    vinyl.style.transform = 'rotate(' + angle + 'deg)';
+    requestAnimationFrame(spinLoop);
+  }
+  requestAnimationFrame(spinLoop);
+
+  // ---------- Web Audio scratch ----------
+  let audioCtx = null, scratchGain = null, scratchSource = null, scratchFilter = null;
+  function initAudio() {
+    if (audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const len = audioCtx.sampleRate * 2;
+    const noiseBuffer = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    scratchFilter = audioCtx.createBiquadFilter();
+    scratchFilter.type = 'bandpass'; scratchFilter.frequency.value = 800; scratchFilter.Q.value = 1.5;
+    scratchGain = audioCtx.createGain(); scratchGain.gain.value = 0;
+    scratchSource = audioCtx.createBufferSource();
+    scratchSource.buffer = noiseBuffer; scratchSource.loop = true;
+    scratchSource.connect(scratchFilter); scratchFilter.connect(scratchGain); scratchGain.connect(audioCtx.destination);
+    scratchSource.start();
+  }
+  function scratchOn(speed) {
+    if (!audioCtx) return;
+    const abs = Math.min(Math.abs(speed), 15);
+    scratchGain.gain.setTargetAtTime(Math.min(abs / 4, 0.7), audioCtx.currentTime, 0.02);
+    scratchFilter.frequency.setTargetAtTime(400 + abs * 200, audioCtx.currentTime, 0.02);
+  }
+  function scratchOff() {
+    if (!audioCtx) return;
+    scratchGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
+  }
+
+  let dragLastAngle = 0;
+  function getAngleFromEvent(e, el) {
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - cx;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - cy;
+    return Math.atan2(y, x) * (180 / Math.PI);
+  }
+  function onScratchStart(e) {
+    if (!playing) return;
+    const r = vinyl.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const px = e.touches ? e.touches[0].clientX : e.clientX;
+    const py = e.touches ? e.touches[0].clientY : e.clientY;
+    if (Math.sqrt((px - cx) ** 2 + (py - cy) ** 2) > r.width / 2) return;
+    e.preventDefault(); initAudio();
+    scratching = true; vinyl.classList.add('scratching');
+    dragLastAngle = getAngleFromEvent(e, vinyl);
+  }
+  function onScratchMove(e) {
+    if (!scratching) return; e.preventDefault();
+    const cur = getAngleFromEvent(e, vinyl);
+    let delta = cur - dragLastAngle;
+    if (delta > 180) delta -= 360;
+    if (delta < -180) delta += 360;
+    angle = (angle + delta + 360) % 360;
+    dragLastAngle = cur;
+    scratchOn(delta);
+  }
+  function onScratchEnd() {
+    if (!scratching) return;
+    scratching = false; vinyl.classList.remove('scratching'); scratchOff();
+  }
+  vinyl.addEventListener('mousedown', onScratchStart);
+  vinyl.addEventListener('touchstart', onScratchStart, { passive: false });
+  window.addEventListener('mousemove', onScratchMove);
+  window.addEventListener('touchmove', onScratchMove, { passive: false });
+  window.addEventListener('mouseup', onScratchEnd);
+  window.addEventListener('touchend', onScratchEnd);
+
+  // ---------- Theater takeover ----------
+  function enterPlaying() {
+    if (busy) return;
+    busy = true;
+
+    // bring the user up to the top so they see the theater
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 1. Fade out nav + hero + dig idle
+    body.classList.add('playing');
+
+    // 2. After fade, collapse the faded elements and reveal the theater + deck
+    setTimeout(() => {
+      body.classList.add('collapsed');
+      // next frame: trigger fade-in
+      requestAnimationFrame(() => {
+        theater.classList.add('in');
+        digDeck.classList.add('in');
+      });
+      // 3. Spin up the video
+      spawnVideo();
+      busy = false;
+      playing = true;
+    }, 380);
+  }
+
+  function spawnVideo() {
+    if (ytPlayer) { try { ytPlayer.destroy(); } catch (e) {} ytPlayer = null; }
+    theaterFrame.innerHTML = '';
+    const vid = pickVideo();
+    const div = document.createElement('div');
+    div.id = 'yt-' + Date.now();
+    theaterFrame.appendChild(div);
+    deckTitle.textContent = 'JZZO mashup · loading…';
+
+    const opts = {
+      videoId: vid,
+      playerVars: { autoplay: 1, rel: 0, modestbranding: 1, playsinline: 1 },
+      events: {
+        onReady: e => {
+          e.target.playVideo();
+          try {
+            const data = e.target.getVideoData();
+            if (data && data.title) deckTitle.textContent = data.title;
+          } catch (err) {}
+        },
+        onStateChange: e => {
+          if (e.data === YT.PlayerState.PLAYING) {
+            spinning = true; lastTime = 0;
+            try {
+              const data = e.target.getVideoData();
+              if (data && data.title) deckTitle.textContent = data.title;
+            } catch (err) {}
+          } else if (e.data === YT.PlayerState.PAUSED) {
+            spinning = false;
+          } else if (e.data === YT.PlayerState.ENDED) {
+            spinning = false;
+            exitPlaying();
+          }
+        }
+      }
+    };
+
+    if (ytReady) {
+      ytPlayer = new YT.Player(div.id, opts);
+    } else {
+      // Fallback: plain iframe, lose state-change events (most users have YT API loaded fast enough)
+      const tries = setInterval(() => {
+        if (ytReady) {
+          clearInterval(tries);
+          ytPlayer = new YT.Player(div.id, opts);
+        }
+      }, 50);
+    }
+  }
+
+  function exitPlaying() {
+    if (!playing) return;
+    playing = false;
+    spinning = false;
+    if (ytPlayer) { try { ytPlayer.destroy(); } catch (e) {} ytPlayer = null; }
+    theaterFrame.innerHTML = '';
+
+    // Fade out theater + deck
+    theater.classList.remove('in');
+    digDeck.classList.remove('in');
+
+    setTimeout(() => {
+      body.classList.remove('collapsed');
+      // next frame: fade nav+hero back in
+      requestAnimationFrame(() => {
+        body.classList.remove('playing');
+      });
+    }, 380);
+  }
+
+  digBtn.addEventListener('click', enterPlaying);
+  digAgainBtn.addEventListener('click', () => {
+    if (busy) return;
+    // Just spin up a new video; theater + deck stay visible
+    spawnVideo();
+  });
+
+  // Esc key exits playback
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && playing) exitPlaying();
+  });
+
+  // ---------- Latest videos via RSS (unchanged) ----------
   const CHANNEL_ID = 'UCki7WCbmrxG23BWa0RzKDYA';
 
   async function loadVideos() {
     const grid = document.getElementById('video-grid');
-    if (CHANNEL_ID === 'REPLACE_WITH_CHANNEL_ID') { renderPlaceholders(grid); return; }
     try {
       const feedUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`;
       const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`;
@@ -241,25 +610,9 @@
             <div class="video-meta">${date}</div>
           </a>`;
       }).join('');
-    } catch { renderPlaceholders(grid); }
-  }
-
-  function renderPlaceholders(grid) {
-    const placeholders = [
-      { title: '$2 record turned into a beat', meta: '3 days ago' },
-      { title: 'Crate dig: Highland Park swap meet', meta: '1 week ago' },
-      { title: 'Why MPC over Maschine in 2026', meta: '2 weeks ago' }
-    ];
-    grid.innerHTML = placeholders.map((v, i) => `
-      <a class="video-card" href="https://www.youtube.com/@jzzo-dyt/videos" target="_blank" rel="noopener">
-        <div class="thumb">
-          <div class="thumb-fallback" style="background: linear-gradient(135deg, ${['#2a1810','#1a2030','#20180a'][i]}, #0a0a0a);">
-            <svg class="play-icon" viewBox="0 0 24 24" fill="#fff" opacity="0.85"><path d="M8 5v14l11-7z"/></svg>
-          </div>
-        </div>
-        <div class="video-title">${v.title}</div>
-        <div class="video-meta">${v.meta}</div>
-      </a>`).join('');
+    } catch {
+      grid.innerHTML = `<a class="video-card" href="https://www.youtube.com/@jzzo-dyt/videos" target="_blank" rel="noopener" style="grid-column: 1 / -1; text-align: center; padding: 24px 0; color: var(--fg-mute); font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em;">VIEW ALL ON YOUTUBE →</a>`;
+    }
   }
 
   function decodeHtml(s) { const t = document.createElement('textarea'); t.innerHTML = s; return t.value; }
@@ -282,7 +635,6 @@
     e.preventDefault();
     document.getElementById('form-note').textContent = "✓ Got it. We'll let you know.";
     e.target.reset();
-    // Wire to your real provider here (Buttondown / ConvertKit / Mailchimp)
   }
 
   document.querySelector('.nav-toggle')?.addEventListener('click', () => {
