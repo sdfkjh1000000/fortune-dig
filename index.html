@@ -85,10 +85,10 @@
   .btn-dig { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--line-strong); color: var(--fg); padding: 13px 22px; border-radius: var(--radius); font-size: 14px; font-family: inherit; cursor: pointer; background: transparent; transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
   .btn-dig:hover { background: rgba(255,255,255,0.05); border-color: var(--accent); color: var(--accent); opacity: 1; }
 
-  /* tease vinyl on the right — scratchable without digging */
-  .dig-tease { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  /* tease vinyl — center the vinyl with the crate; caption hangs absolutely below so it doesn't pull the centering up */
+  .dig-tease { display: flex; flex-direction: column; align-items: center; position: relative; }
   .tease-wrap { width: 150px; height: 150px; position: relative; }
-  .tease-caption { text-align: center; }
+  .tease-caption { position: absolute; top: calc(100% + 14px); left: 50%; transform: translateX(-50%); text-align: center; white-space: nowrap; }
   .tease-caption .label-line { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.22em; text-transform: uppercase; }
   .tease-caption .sub-line { font-family: var(--mono); font-size: 9px; color: var(--fg-faint); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 4px; }
 
@@ -195,8 +195,9 @@
     .dig-idle { grid-template-columns: 1fr; gap: 20px; text-align: center; }
     .dig-art { margin: 0 auto; width: 180px; height: 180px; }
     .dig-idle p { margin-left: auto; margin-right: auto; }
-    .dig-tease { margin-top: 8px; }
+    .dig-tease { margin-top: 8px; gap: 14px; }
     .tease-wrap { width: 130px; height: 130px; }
+    .tease-caption { position: static; transform: none; left: auto; top: auto; white-space: normal; }
     .dig-deck { flex-wrap: wrap; gap: 16px; justify-content: center; text-align: center; }
     .dig-deck .deck-vinyl { width: 72px; height: 72px; flex: 0 0 72px; }
     .dig-deck .deck-info { flex: 1 1 auto; min-width: 60%; align-items: center; }
