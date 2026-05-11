@@ -75,15 +75,22 @@
 
   #dig { padding: 80px 0; transition: padding var(--fade); }
 
-  /* idle state: crate + copy + button */
-  .dig-idle { display: grid; grid-template-columns: 240px 1fr; gap: 40px; align-items: center; transition: opacity var(--fade); }
-  .dig-art { width: 240px; height: 240px; display: flex; align-items: center; justify-content: center; }
+  /* idle state: crate + copy + scratch-tease vinyl */
+  .dig-idle { display: grid; grid-template-columns: 220px 1fr 160px; gap: 40px; align-items: center; transition: opacity var(--fade); }
+  .dig-art { width: 220px; height: 220px; display: flex; align-items: center; justify-content: center; }
   .dig-art img { max-width: 100%; height: auto; filter: drop-shadow(0 18px 32px rgba(0,0,0,0.6)); }
   .dig-tag { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.2em; margin-bottom: 10px; }
   .dig-idle h3 { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 12px; line-height: 1.05; }
   .dig-idle p { color: var(--fg-dim); font-size: 15px; margin-bottom: 24px; max-width: 460px; }
   .btn-dig { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--line-strong); color: var(--fg); padding: 13px 22px; border-radius: var(--radius); font-size: 14px; font-family: inherit; cursor: pointer; background: transparent; transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
   .btn-dig:hover { background: rgba(255,255,255,0.05); border-color: var(--accent); color: var(--accent); opacity: 1; }
+
+  /* tease vinyl on the right — scratchable without digging */
+  .dig-tease { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .tease-wrap { width: 150px; height: 150px; position: relative; }
+  .tease-caption { text-align: center; }
+  .tease-caption .label-line { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.22em; text-transform: uppercase; }
+  .tease-caption .sub-line { font-family: var(--mono); font-size: 9px; color: var(--fg-faint); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 4px; }
 
   /* deck state: spinning vinyl + track info + dig-again */
   .dig-deck { display: none; align-items: center; gap: 28px; opacity: 0; transition: opacity var(--fade); }
@@ -183,6 +190,8 @@
     .dig-idle { grid-template-columns: 1fr; gap: 20px; text-align: center; }
     .dig-art { margin: 0 auto; width: 180px; height: 180px; }
     .dig-idle p { margin-left: auto; margin-right: auto; }
+    .dig-tease { margin-top: 8px; }
+    .tease-wrap { width: 130px; height: 130px; }
     .dig-deck { flex-wrap: wrap; gap: 16px; justify-content: center; text-align: center; }
     .dig-deck .deck-vinyl { width: 72px; height: 72px; flex: 0 0 72px; }
     .dig-deck .deck-info { flex: 1 1 auto; min-width: 60%; align-items: center; }
@@ -230,13 +239,56 @@
     <!-- IDLE: pre-dig -->
     <div class="dig-idle" id="digIdle">
       <div class="dig-art">
-        <img src="/crate.png" alt="A wooden crate full of vinyl records" width="240" height="240">
+        <img src="/crate.png" alt="A wooden crate full of vinyl records" width="220" height="220">
       </div>
       <div>
         <div class="dig-tag">FW SERIES</div>
         <h3>Dig the Crate</h3>
         <p>A random mashup from Joe's crate. Pull a record, hit play, scratch the wax.</p>
         <button class="btn-dig" id="digBtn" type="button">▼ Dig in the crate</button>
+      </div>
+      <div class="dig-tease">
+        <div class="tease-wrap">
+        <div class="vinyl" id="vinylIdle">
+          <div class="label">
+            <svg class="label-svg" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <path id="arc-top-i" d="M 20,70 Q 100,5 180,70" fill="none"/>
+                <path id="arc-bot-i" d="M 30,78 Q 100,120 170,78" fill="none"/>
+                <linearGradient id="lens-l-i" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#6b4c2a" stop-opacity=".6"/>
+                  <stop offset="50%" stop-color="#d4713a" stop-opacity=".4"/>
+                  <stop offset="100%" stop-color="#4a2d6b" stop-opacity=".5"/>
+                </linearGradient>
+                <linearGradient id="lens-r-i" x1="1" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#4a2d6b" stop-opacity=".5"/>
+                  <stop offset="50%" stop-color="#d4713a" stop-opacity=".4"/>
+                  <stop offset="100%" stop-color="#6b4c2a" stop-opacity=".6"/>
+                </linearGradient>
+              </defs>
+              <text font-family="'Courier New',monospace" font-size="11" font-weight="bold" fill="#5a3e1a" letter-spacing="3">
+                <textPath href="#arc-top-i" startOffset="50%" text-anchor="middle">FORTUNE WAX</textPath>
+              </text>
+              <g transform="translate(100,52)">
+                <path d="M -8,0 Q 0,-6 8,0" stroke="#3a2510" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <rect x="-48" y="-10" width="38" height="22" rx="4" fill="url(#lens-l-i)" stroke="#3a2510" stroke-width="2"/>
+                <rect x="10" y="-10" width="38" height="22" rx="4" fill="url(#lens-r-i)" stroke="#3a2510" stroke-width="2"/>
+                <line x1="-48" y1="-4" x2="-58" y2="-8" stroke="#3a2510" stroke-width="2" stroke-linecap="round"/>
+                <line x1="48" y1="-4" x2="58" y2="-8" stroke="#3a2510" stroke-width="2" stroke-linecap="round"/>
+                <text x="-29" y="5" font-family="'Courier New',monospace" font-size="12" font-weight="bold" fill="#2a1c0f" text-anchor="middle" opacity=".85">JZ</text>
+                <text x="29" y="5" font-family="'Courier New',monospace" font-size="12" font-weight="bold" fill="#2a1c0f" text-anchor="middle" opacity=".85">ZO</text>
+              </g>
+              <text font-family="'Courier New',monospace" font-size="9" fill="#5a3e1a" letter-spacing="2" opacity=".5">
+                <textPath href="#arc-bot-i" startOffset="50%" text-anchor="middle">JUST ZIG ZAGGING</textPath>
+              </text>
+            </svg>
+          </div>
+        </div>
+        </div>
+        <div class="tease-caption">
+          <div class="label-line">Just scratch</div>
+          <div class="sub-line">↺ drag the record</div>
+        </div>
       </div>
     </div>
 
@@ -380,21 +432,28 @@
   const digDeck      = $('digDeck');
   const digBtn       = $('digBtn');
   const digAgainBtn  = $('digAgainBtn');
-  const vinyl        = $('vinyl');
+  const vinylDeck    = $('vinyl');
+  const vinylIdle    = $('vinylIdle');
   const deckTitle    = $('deckTitle');
 
   let playing = false;
   let busy = false;
+  let activeVinyl = vinylIdle;
 
-  // ---------- YouTube IFrame API ----------
+  // ---------- YouTube IFrame API (lazy-loaded on first dig) ----------
   let ytReady = false;
+  let ytAPILoaded = false;
   let ytPlayer = null;
-  const ytTag = document.createElement('script');
-  ytTag.src = 'https://www.youtube.com/iframe_api';
-  document.head.appendChild(ytTag);
   window.onYouTubeIframeAPIReady = function () { ytReady = true; };
+  function loadYTAPI() {
+    if (ytAPILoaded) return;
+    ytAPILoaded = true;
+    const ytTag = document.createElement('script');
+    ytTag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(ytTag);
+  }
 
-  // ---------- Vinyl spin (33⅓ rpm while playing, paused while scratching) ----------
+  // ---------- Vinyl spin (33⅓ rpm while video plays, paused while scratching) ----------
   let angle = 0, spinning = false, scratching = false, lastTime = 0;
   const RPM = 33.33;
   const DEG_PER_MS = (RPM * 360) / 60000;
@@ -402,7 +461,9 @@
     if (!lastTime) lastTime = ts;
     const dt = ts - lastTime; lastTime = ts;
     if (spinning && !scratching) angle = (angle + DEG_PER_MS * dt) % 360;
-    vinyl.style.transform = 'rotate(' + angle + 'deg)';
+    const t = 'rotate(' + angle + 'deg)';
+    vinylIdle.style.transform = t;
+    vinylDeck.style.transform = t;
     requestAnimationFrame(spinLoop);
   }
   requestAnimationFrame(spinLoop);
@@ -444,19 +505,22 @@
     return Math.atan2(y, x) * (180 / Math.PI);
   }
   function onScratchStart(e) {
-    if (!playing) return;
-    const r = vinyl.getBoundingClientRect();
+    const v = e.currentTarget;
+    // deck vinyl is only interactive while playing; idle vinyl is always live
+    if (v === vinylDeck && !playing) return;
+    const r = v.getBoundingClientRect();
     const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
     const px = e.touches ? e.touches[0].clientX : e.clientX;
     const py = e.touches ? e.touches[0].clientY : e.clientY;
     if (Math.sqrt((px - cx) ** 2 + (py - cy) ** 2) > r.width / 2) return;
     e.preventDefault(); initAudio();
-    scratching = true; vinyl.classList.add('scratching');
-    dragLastAngle = getAngleFromEvent(e, vinyl);
+    activeVinyl = v;
+    scratching = true; v.classList.add('scratching');
+    dragLastAngle = getAngleFromEvent(e, v);
   }
   function onScratchMove(e) {
     if (!scratching) return; e.preventDefault();
-    const cur = getAngleFromEvent(e, vinyl);
+    const cur = getAngleFromEvent(e, activeVinyl);
     let delta = cur - dragLastAngle;
     if (delta > 180) delta -= 360;
     if (delta < -180) delta += 360;
@@ -466,10 +530,14 @@
   }
   function onScratchEnd() {
     if (!scratching) return;
-    scratching = false; vinyl.classList.remove('scratching'); scratchOff();
+    scratching = false;
+    if (activeVinyl) activeVinyl.classList.remove('scratching');
+    scratchOff();
   }
-  vinyl.addEventListener('mousedown', onScratchStart);
-  vinyl.addEventListener('touchstart', onScratchStart, { passive: false });
+  [vinylIdle, vinylDeck].forEach(v => {
+    v.addEventListener('mousedown', onScratchStart);
+    v.addEventListener('touchstart', onScratchStart, { passive: false });
+  });
   window.addEventListener('mousemove', onScratchMove);
   window.addEventListener('touchmove', onScratchMove, { passive: false });
   window.addEventListener('mouseup', onScratchEnd);
@@ -479,6 +547,9 @@
   function enterPlaying() {
     if (busy) return;
     busy = true;
+
+    // Begin loading the YT IFrame API now (cheaper than at page load; covers fade time)
+    loadYTAPI();
 
     // bring the user up to the top so they see the theater
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -512,6 +583,7 @@
 
     const opts = {
       videoId: vid,
+      host: 'https://www.youtube-nocookie.com',
       playerVars: { autoplay: 1, rel: 0, modestbranding: 1, playsinline: 1 },
       events: {
         onReady: e => {
