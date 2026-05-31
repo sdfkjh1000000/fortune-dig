@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JZZO · Just Zig Zagging Obstacles</title>
+<link rel="canonical" href="https://jzzo.sdfkjh.com/">
 <meta name="description" content="JZZO. Just Zig Zagging Obstacles. All mashups, made in LA. Dig the crate.">
 <meta property="og:title" content="JZZO · Just Zig Zagging Obstacles">
 <meta property="og:description" content="Just Zig Zagging Obstacles. All mashups, made in LA.">
@@ -11,6 +12,8 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="JZZO">
+<meta property="og:locale" content="en_US">
 <meta property="og:url" content="https://jzzo.sdfkjh.com/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="JZZO · Just Zig Zagging Obstacles">
@@ -27,7 +30,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg: #0a0a0a; --bg-elev: #131313; --fg: #ffffff;
-    --fg-dim: rgba(255,255,255,0.7); --fg-mute: rgba(255,255,255,0.5); --fg-faint: rgba(255,255,255,0.4);
+    --fg-dim: rgba(255,255,255,0.7); --fg-mute: rgba(255,255,255,0.5); --fg-faint: rgba(255,255,255,0.55);
     --line: rgba(255,255,255,0.1); --line-strong: rgba(255,255,255,0.2);
     --yt-red: #ff0000; --accent: #ff5a3c;
     --label-bg: #c4a96a;
@@ -41,8 +44,13 @@
   a { color: inherit; text-decoration: none; }
   a:hover { opacity: 0.85; }
   .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+  .skip-link { position: absolute; left: -9999px; top: 0; z-index: 100; background: var(--fg); color: var(--bg); padding: 10px 16px; font-family: var(--mono); font-size: 12px; font-weight: 500; border-radius: 0 0 var(--radius) 0; }
+  .skip-link:focus { left: 0; }
+  picture { display: contents; }
+  .footer-credit { font-family: var(--mono); font-size: 11px; color: var(--fg-faint); letter-spacing: 0.05em; }
+  .footer-credit a:hover { color: var(--fg); opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; } }
 
-  /* ---------- NAV (fades out during playback) ---------- */
   .nav { position: sticky; top: 0; z-index: 50; background: rgba(10,10,10,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); transition: opacity var(--fade); }
   .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; }
   .logo { display: flex; align-items: baseline; gap: 8px; font-weight: 600; letter-spacing: 0.05em; font-size: 15px; }
@@ -51,7 +59,6 @@
   .nav-links a:hover { color: var(--fg); opacity: 1; }
   .nav-toggle { display: none; background: none; border: none; color: var(--fg); cursor: pointer; font-size: 22px; }
 
-  /* ---------- HERO (fades out during playback) ---------- */
   .hero { text-align: center; padding: 96px 0 150px; position: relative; overflow: visible; transition: opacity var(--fade); }
   .hero-tagline { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.25em; margin-bottom: 24px; }
   .hero h1 { font-size: clamp(56px, 9vw, 96px); font-weight: 600; letter-spacing: -0.03em; line-height: 1; margin-bottom: 20px; }
@@ -61,18 +68,15 @@
   .btn-yt-ghost:hover { background: rgba(255,255,255,0.05); border-color: var(--fg-mute); color: var(--fg); opacity: 1; }
   .btn-yt-ghost svg { width: 16px; height: 16px; color: var(--yt-red); flex: 0 0 16px; }
 
-  /* ---------- BRIDGE — desktop: crate; mobile: scratch vinyl ---------- */
   .bridge { position: relative; height: 0; z-index: 5; transition: opacity var(--fade); }
   .bridge .crate-img { position: absolute; left: 50%; top: -130px; transform: translateX(-50%); width: 300px; height: auto; filter: drop-shadow(0 30px 40px rgba(0,0,0,0.75)); pointer-events: none; user-select: none; -webkit-user-drag: none; }
-  .bridge-tease { display: none; }  /* mobile-only — overridden in @media block */
-  .floor-crate-img { display: none; }  /* mobile-only — overridden in @media block */
+  .bridge-tease { display: none; }
+  .floor-crate-img { display: none; }
 
-  /* ---------- THEATER (hidden until playback) ---------- */
   .theater { display: none; width: 100%; background: #000; border-bottom: 1px solid var(--line); opacity: 0; transition: opacity var(--fade); }
   .theater-frame { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; }
   .theater-frame iframe, .theater-frame > div { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 
-  /* ---------- DIG SECTION (slot 2, two states) ---------- */
   section { padding: 64px 0; border-bottom: 1px solid var(--line); }
   .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 28px; }
   .section-head h2 { font-size: 22px; font-weight: 500; }
@@ -81,23 +85,20 @@
 
   #dig { padding: 160px 0 80px; transition: padding var(--fade); }
 
-  /* idle state: vinyl-tease left, copy right. Crate now lives in the bridge above. */
   .dig-idle { display: grid; grid-template-columns: 200px 1fr; gap: 56px; align-items: center; transition: opacity var(--fade); }
   .dig-copy { max-width: 520px; }
   .dig-tag { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.2em; margin-bottom: 10px; }
-  .dig-idle h3 { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 12px; line-height: 1.05; }
+  .dig-idle h2 { font-size: 32px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 12px; line-height: 1.05; }
   .dig-idle p { color: var(--fg-dim); font-size: 15px; margin-bottom: 24px; max-width: 460px; }
   .btn-dig { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--line-strong); color: var(--fg); padding: 13px 22px; border-radius: var(--radius); font-size: 14px; font-family: inherit; cursor: pointer; background: transparent; transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
   .btn-dig:hover { background: rgba(255,255,255,0.05); border-color: var(--accent); color: var(--accent); opacity: 1; }
 
-  /* tease vinyl — disc center aligns with copy center via absolute caption (desktop); flow caption on mobile */
   .dig-tease { display: flex; flex-direction: column; align-items: center; position: relative; }
   .tease-wrap { width: 150px; height: 150px; position: relative; }
   .tease-caption { position: absolute; top: calc(100% + 14px); left: 50%; transform: translateX(-50%); text-align: center; white-space: nowrap; }
   .tease-caption .label-line { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.22em; text-transform: uppercase; }
   .tease-caption .sub-line { font-family: var(--mono); font-size: 9px; color: var(--fg-faint); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 4px; }
 
-  /* deck state: spinning vinyl + track info + dig-again */
   .dig-deck { display: none; align-items: center; gap: 28px; opacity: 0; transition: opacity var(--fade); }
   .dig-deck .deck-vinyl { width: 96px; height: 96px; flex: 0 0 96px; position: relative; }
   .dig-deck .deck-info { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -109,7 +110,6 @@
   .dig-deck .btn-again:hover { background: rgba(255,255,255,0.05); border-color: var(--accent); color: var(--accent); opacity: 1; }
   @keyframes pulse { 50% { box-shadow: 0 0 0 8px transparent; } }
 
-  /* vinyl (spinning, scratchable) — same record from /fortune/, sized for the deck */
   .vinyl {
     width: 100%; height: 100%; border-radius: 50%; position: relative; touch-action: none; cursor: grab;
     background: radial-gradient(circle, transparent 18%,
@@ -137,7 +137,6 @@
   }
   .label-svg { width: 90%; height: auto; display: block; pointer-events: none; }
 
-  /* ---------- BODY.PLAYING STATE ---------- */
   body.playing .nav { opacity: 0; pointer-events: none; }
   body.playing .hero { opacity: 0; pointer-events: none; }
   body.playing .bridge { opacity: 0; pointer-events: none; }
@@ -151,7 +150,6 @@
   body.playing .dig-deck { display: flex; }
   body.playing .dig-deck.in { opacity: 1; }
 
-  /* ---------- VIDEOS GRID ---------- */
   .videos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   .video-card { display: block; }
   .thumb { aspect-ratio: 16/9; background: var(--bg-elev); border-radius: var(--radius); position: relative; overflow: hidden; background-size: cover; background-position: center; transition: transform 0.2s ease; }
@@ -164,18 +162,15 @@
   .video-meta { color: var(--fg-faint); font-family: var(--mono); font-size: 11px; margin-top: 4px; }
   .videos-loading { grid-column: 1 / -1; text-align: center; color: var(--fg-mute); font-family: var(--mono); font-size: 12px; padding: 40px 0; }
 
-  /* ---------- ABOUT (now its own section, above videos) ---------- */
   #about { text-align: center; }
   #about .about-inner { max-width: 640px; margin: 0 auto; }
   #about .split-tag { display: block; }
 
-  /* ---------- STORE (now standalone, below videos) ---------- */
   #store { text-align: center; }
   #store .store-inner { max-width: 520px; margin: 0 auto; }
 
-  /* shared eyebrow + section copy treatment */
   .split-tag { font-family: var(--mono); font-size: 11px; color: var(--fg-mute); letter-spacing: 0.2em; margin-bottom: 14px; }
-  #about h3, #store h3 { font-size: 26px; font-weight: 600; letter-spacing: -0.015em; margin-bottom: 14px; line-height: 1.15; }
+  #about h2, #store h2 { font-size: 26px; font-weight: 600; letter-spacing: -0.015em; margin-bottom: 14px; line-height: 1.15; }
   #about p, #store p { color: var(--fg-dim); font-size: 15px; line-height: 1.65; margin-bottom: 22px; }
   .email-form { display: flex; gap: 8px; max-width: 420px; margin: 0 auto; }
   .email-form input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--line-strong); border-radius: var(--radius); padding: 10px 14px; color: var(--fg); font-family: inherit; font-size: 13px; outline: none; transition: border-color 0.15s ease; }
@@ -185,7 +180,6 @@
   .email-form button:hover { opacity: 0.85; }
   .form-note { font-family: var(--mono); font-size: 10px; color: var(--fg-faint); margin-top: 10px; letter-spacing: 0.05em; }
 
-  /* ---------- FOOTER ---------- */
   footer { padding: 32px 0; }
   .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
   .footer-loc { font-family: var(--mono); font-size: 10px; color: var(--fg-faint); letter-spacing: 0.2em; }
@@ -198,15 +192,14 @@
     .nav-links { display: none; }
     .nav-toggle { display: block; }
     .hero { padding: 64px 0 56px; }
-    /* Mobile: vinyl bridges the hero/dig boundary; crate sits below the dig button */
     .hero { padding: 64px 0 90px; }
-    .bridge .crate-img { display: none; }  /* hide bridge crate on mobile */
+    .bridge .crate-img { display: none; }
     .bridge-tease { display: block; position: absolute; left: 50%; top: -75px; transform: translateX(-50%); width: 150px; pointer-events: auto; }
     .bridge-tease .tease-wrap { width: 150px; height: 150px; position: relative; }
     .bridge-tease .tease-caption { position: absolute; top: calc(100% + 12px); left: 50%; transform: translateX(-50%); text-align: center; white-space: nowrap; }
     #dig { padding: 130px 0 56px; }
     .dig-idle { grid-template-columns: 1fr; gap: 22px; justify-items: center; text-align: center; }
-    .dig-tease { display: none; }  /* hide inline scratch vinyl on mobile (it lives in the bridge now) */
+    .dig-tease { display: none; }
     .dig-copy { max-width: 100%; }
     .dig-idle p { margin-left: auto; margin-right: auto; }
     .floor-crate-img { display: block; max-width: 240px; height: auto; margin: 32px auto 0; filter: drop-shadow(0 18px 32px rgba(0,0,0,0.6)); }
@@ -219,8 +212,15 @@
     #about, #store { padding: 48px 0; }
   }
 </style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"MusicGroup","@id":"https://jzzo.sdfkjh.com/#musicgroup","name":"JZZO","alternateName":"Just Zig Zagging Obstacles","url":"https://jzzo.sdfkjh.com/","genre":["Hip Hop","Mashup","Soul"],"description":"Mashups built from underground hip-hop, soul, and whatever else lands in the crate. Made in LA since October 2022.","foundingLocation":{"@type":"Place","name":"Los Angeles, California"},"sameAs":["https://www.youtube.com/@jzzo-dyt"]},
+{"@type":"WebSite","@id":"https://jzzo.sdfkjh.com/#website","url":"https://jzzo.sdfkjh.com/","name":"JZZO","inLanguage":"en","publisher":{"@id":"https://jzzo.sdfkjh.com/#musicgroup"}}
+]}
+</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <nav class="nav">
   <div class="wrap nav-inner">
@@ -234,6 +234,8 @@
   </div>
 </nav>
 
+<main id="main">
+
 <header class="hero">
   <div class="wrap">
     <div class="hero-tagline">UNDERGROUND · LOS ANGELES</div>
@@ -243,9 +245,8 @@
   </div>
 </header>
 
-<!-- BRIDGE — desktop: crate spans hero/dig boundary; mobile: scratch vinyl spans the boundary -->
 <div class="bridge" id="bridge">
-  <img class="crate-img" src="/crate.png" alt="" draggable="false">
+  <picture><source srcset="/crate.webp" type="image/webp"><img class="crate-img" src="/crate.png" alt="" width="640" height="544" draggable="false"></picture>
   <div class="bridge-tease" aria-hidden="false">
     <div class="tease-wrap">
       <div class="vinyl" id="vinylBridgeMobile">
@@ -291,16 +292,13 @@
   </div>
 </div>
 
-<!-- THEATER — only visible during playback -->
 <section class="theater" id="theater" aria-hidden="true">
   <div class="theater-frame" id="theaterFrame"></div>
 </section>
 
-<!-- DIG (slot 2) — two states: idle and deck -->
 <section id="dig">
   <div class="wrap">
 
-    <!-- IDLE: pre-dig (crate now lives in the .bridge above; this is just vinyl-tease + copy) -->
     <div class="dig-idle" id="digIdle">
       <div class="dig-tease">
         <div class="tease-wrap">
@@ -347,14 +345,13 @@
       </div>
       <div class="dig-copy">
         <div class="dig-tag">FW SERIES</div>
-        <h3>Dig the Crate</h3>
+        <h2>Dig the Crate</h2>
         <p>A random mashup from the crate. Pull a record, hit play, scratch the wax.</p>
         <button class="btn-dig" id="digBtn" type="button">▼ Dig in the crate</button>
       </div>
-      <img class="floor-crate-img" src="/crate.png" alt="" draggable="false">
+      <picture><source srcset="/crate.webp" type="image/webp"><img class="floor-crate-img" src="/crate.png" alt="" width="640" height="544" loading="lazy" draggable="false"></picture>
     </div>
 
-    <!-- DECK: post-dig (visible while video plays) -->
     <div class="dig-deck" id="digDeck">
       <div class="deck-vinyl">
         <div class="vinyl" id="vinyl">
@@ -408,7 +405,7 @@
   <div class="wrap">
     <div class="about-inner">
       <div class="split-tag">ABOUT</div>
-      <h3>Who's JZZO?</h3>
+      <h2>Who's JZZO?</h2>
       <p>Jzzo: Just Zig Zagging Obstacles. Mashups built from underground hip-hop, soul, and whatever else lands in the crate. Posted from LA since October 2022. Still digging.</p>
       <a class="btn-yt-ghost" href="https://www.youtube.com/@jzzo-dyt?sub_confirmation=1" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
@@ -434,7 +431,7 @@
   <div class="wrap">
     <div class="store-inner">
       <div class="split-tag">STORE</div>
-      <h3>Merch coming soon</h3>
+      <h2>Merch coming soon</h2>
       <p>Tees, slipmats, and limited beat tapes. Drop your email and you'll know first. No spam, just the drop.</p>
       <form class="email-form" onsubmit="handleSignup(event)">
         <input type="email" placeholder="your@email.com" required aria-label="Email address">
@@ -445,6 +442,8 @@
   </div>
 </section>
 
+</main>
+
 <footer>
   <div class="wrap footer-inner">
     <div class="footer-loc">34°N · 118°W · LOS ANGELES</div>
@@ -454,15 +453,12 @@
       <a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43V8.41a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.84-.27z"/></svg></a>
       <a href="mailto:hello@jzzo.sdfkjh.com" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg></a>
     </div>
+    <div class="footer-credit">Web design by <a href="https://eightit.com" target="_blank" rel="noopener">Eight IT</a></div>
   </div>
 </footer>
 
 <script>
-  // ============================================================
-  //  JZZO homepage — theater takeover + scratch deck
-  // ============================================================
 
-  // ---------- Curated video pools (Joe's playlists) ----------
   const AESOP_VIDEOS = [
     "D1W5Ut3jfkk","4WkwYVfZMRo","zFsgIMNO_y4","2l-QYix64-A","hg6gdeyA4rE",
     "qEH_PUvWSzU","IM5uMhYJFzA","BfeS7Fc2bp4","wVD5nwI_ABc","ECpG_GVm6ds",
@@ -499,7 +495,6 @@
   }
   refillAesop(); refillDoom();
 
-  // ---------- DOM ----------
   const $ = id => document.getElementById(id);
   const body         = document.body;
   const theater      = $('theater');
@@ -517,7 +512,6 @@
   let busy = false;
   let activeVinyl = vinylIdle;
 
-  // ---------- YouTube IFrame API (lazy-loaded on first dig) ----------
   let ytReady = false;
   let ytAPILoaded = false;
   let ytPlayer = null;
@@ -530,7 +524,6 @@
     document.head.appendChild(ytTag);
   }
 
-  // ---------- Vinyl spin (33⅓ rpm while video plays, paused while scratching) ----------
   let angle = 0, spinning = false, scratching = false, lastTime = 0;
   const RPM = 33.33;
   const DEG_PER_MS = (RPM * 360) / 60000;
@@ -546,7 +539,6 @@
   }
   requestAnimationFrame(spinLoop);
 
-  // ---------- Web Audio scratch ----------
   let audioCtx = null, scratchGain = null, scratchSource = null, scratchFilter = null;
   function initAudio() {
     if (!audioCtx) {
@@ -563,7 +555,6 @@
       scratchSource.connect(scratchFilter); scratchFilter.connect(scratchGain); scratchGain.connect(audioCtx.destination);
       scratchSource.start();
     }
-    // iOS / mobile Safari: AudioContext is created in 'suspended' state until resumed inside a user gesture.
     if (audioCtx.state === 'suspended') {
       audioCtx.resume();
     }
@@ -589,7 +580,6 @@
   }
   function onScratchStart(e) {
     const v = e.currentTarget;
-    // deck vinyl is only interactive while playing; idle vinyl is always live
     if (v === vinylDeck && !playing) return;
     const r = v.getBoundingClientRect();
     const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
@@ -626,29 +616,22 @@
   window.addEventListener('mouseup', onScratchEnd);
   window.addEventListener('touchend', onScratchEnd);
 
-  // ---------- Theater takeover ----------
   function enterPlaying() {
     if (busy) return;
     busy = true;
 
-    // Begin loading the YT IFrame API now (cheaper than at page load; covers fade time)
     loadYTAPI();
 
-    // bring the user up to the top so they see the theater
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // 1. Fade out nav + hero + dig idle
     body.classList.add('playing');
 
-    // 2. After fade, collapse the faded elements and reveal the theater + deck
     setTimeout(() => {
       body.classList.add('collapsed');
-      // next frame: trigger fade-in
       requestAnimationFrame(() => {
         theater.classList.add('in');
         digDeck.classList.add('in');
       });
-      // 3. Spin up the video
       spawnVideo();
       busy = false;
       playing = true;
@@ -696,7 +679,6 @@
     if (ytReady) {
       ytPlayer = new YT.Player(div.id, opts);
     } else {
-      // Fallback: plain iframe, lose state-change events (most users have YT API loaded fast enough)
       const tries = setInterval(() => {
         if (ytReady) {
           clearInterval(tries);
@@ -713,13 +695,11 @@
     if (ytPlayer) { try { ytPlayer.destroy(); } catch (e) {} ytPlayer = null; }
     theaterFrame.innerHTML = '';
 
-    // Fade out theater + deck
     theater.classList.remove('in');
     digDeck.classList.remove('in');
 
     setTimeout(() => {
       body.classList.remove('collapsed');
-      // next frame: fade nav+hero back in
       requestAnimationFrame(() => {
         body.classList.remove('playing');
       });
@@ -729,16 +709,13 @@
   digBtn.addEventListener('click', enterPlaying);
   digAgainBtn.addEventListener('click', () => {
     if (busy) return;
-    // Just spin up a new video; theater + deck stay visible
     spawnVideo();
   });
 
-  // Esc key exits playback
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && playing) exitPlaying();
   });
 
-  // ---------- Latest videos via RSS (unchanged) ----------
   const CHANNEL_ID = 'UCki7WCbmrxG23BWa0RzKDYA';
 
   async function loadVideos() {
